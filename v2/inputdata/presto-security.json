@@ -1,0 +1,14 @@
+{
+  "schemas": [
+  ],
+  "tables": [
+    {
+      "user": "customer1",
+      "schema": "default",
+      "table": ".*",
+      "privileges": []
+    }
+  ],
+  "sessionProperties": [
+  ]
+}

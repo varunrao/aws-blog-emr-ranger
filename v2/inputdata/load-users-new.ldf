@@ -1,0 +1,88 @@
+dn: CN=hadoop_admin,CN=Users,DC=awsemr,DC=com
+changetype: add
+objectClass: top
+objectClass: group
+cn: hadoop_admin
+instanceType: 4
+uSNCreated: 3906
+name: hadoop_admin
+sAMAccountName: hadoop_admin
+objectCategory: CN=Group,CN=Schema,CN=Configuration,DC=awsemr,DC=com
+distinguishedName: CN=hadoop_admin,CN=Users,DC=awsemr,DC=com
+
+dn: CN=hadoop_analyst,CN=Users,DC=awsemr,DC=com
+changetype: add
+objectClass: top
+objectClass: group
+cn: hadoop_analyst
+instanceType: 4
+uSNCreated: 3906
+name: hadoop_analyst
+sAMAccountName: hadoop_analyst
+objectCategory: CN=Group,CN=Schema,CN=Configuration,DC=awsemr,DC=com
+distinguishedName: CN=hadoop_analyst,CN=Users,DC=awsemr,DC=com
+
+dn: CN=binduser,CN=Users,DC=awsemr,DC=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: user
+cn: binduser
+instanceType: 4
+sAMAccountName: binduser
+userPrincipalName: binduser@awsemr.com
+objectCategory: CN=Person,CN=Schema,CN=Configuration,DC=awsemr,DC=com
+distinguishedName: CN=binduser,CN=Users,DC=awsemr,DC=com
+
+dn: CN=analyst1,CN=Users,DC=awsemr,DC=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: user
+cn: analyst1
+instanceType: 4
+sAMAccountName: analyst1
+userPrincipalName: analyst1@awsemr.com
+objectCategory: CN=Person,CN=Schema,CN=Configuration,DC=awsemr,DC=com
+distinguishedName: CN=analyst1,CN=Users,DC=awsemr,DC=com
+
+dn: CN=analyst2,CN=Users,DC=awsemr,DC=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: user
+cn: analyst2
+instanceType: 4
+sAMAccountName: analyst2
+userPrincipalName: analyst2@awsemr.com
+objectCategory: CN=Person,CN=Schema,CN=Configuration,DC=awsemr,DC=com
+distinguishedName: CN=analyst2,CN=Users,DC=awsemr,DC=com
+
+dn: CN=admin1,CN=Users,DC=awsemr,DC=com
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: user
+cn: admin1
+instanceType: 4
+sAMAccountName: admin1
+userPrincipalName: admin1@awsemr.com
+objectCategory: CN=Person,CN=Schema,CN=Configuration,DC=awsemr,DC=com
+distinguishedName: CN=admin1,CN=Users,DC=awsemr,DC=com
+
+dn: CN=hadoop_analyst,CN=Users,DC=awsemr,DC=com
+changeType: Modify
+add: member
+member: CN=analyst1,CN=Users,DC=awsemr,DC=com
+member: CN=analyst2,CN=Users,DC=awsemr,DC=com
+-
+
+dn: CN=hadoop_admin,CN=Users,DC=awsemr,DC=com
+changeType: Modify
+add: member
+member: CN=admin1,CN=Users,DC=awsemr,DC=com
+-

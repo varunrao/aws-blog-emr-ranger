@@ -1,0 +1,19 @@
+dn: CN=binduser,CN=Users,DC=awsemr,DC=com
+changetype: modify
+replace: userAccountControl
+userAccountControl: 512
+
+dn: CN=analyst1,CN=Users,DC=awsemr,DC=com
+changetype: modify
+replace: userAccountControl
+userAccountControl: 512
+
+dn: CN=analyst2,CN=Users,DC=awsemr,DC=com
+changetype: modify
+replace: userAccountControl
+userAccountControl: 512
+
+dn: CN=admin1,CN=Users,DC=awsemr,DC=com
+changetype: modify
+replace: userAccountControl
+userAccountControl: 512

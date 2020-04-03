@@ -1,0 +1,38 @@
+{
+  "AuthorizationConfiguration": {
+  	"KerberosConfiguration": {
+            "Provider": "ClusterDedicatedKdc",
+            "ClusterDedicatedKdcConfiguration": {
+                "TicketLifetimeInHours": 24,
+                "CrossRealmTrustConfiguration": {
+                    "Realm": "EC2.INTERNAL",
+                    "Domain": "awsemr.com",
+                    "AdminServer": "awsemr.com",
+                    "KdcServer": "awsemr.com"
+                }
+            }
+        }
+    },
+    "EmrFsConfiguration": {
+      "RoleMappings": [{
+        "Role": "arn:aws:iam::453530013122:role/DeveloperRole",
+        "IdentifierType": "Group",
+        "Identifiers": [ "developer" ]
+      },{
+        "Role": "arn:aws:iam::453530013122:role/AnalystRole",
+        "IdentifierType": "Group",
+        "Identifiers": [ "analyst" ]
+      },
+      {
+        "Role": "arn:aws:iam::453530013122:role/Customer_CompanyARole",
+        "IdentifierType": "Group",
+        "Identifiers": [ "customer_companyA" ]
+      },
+      {
+        "Role": "arn:aws:iam::453530013122:role/Businessuser_Product1Role",
+        "IdentifierType": "Group",
+        "Identifiers": [ "businessuser_product1" ]
+      }]
+    }
+  }
+}

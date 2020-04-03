@@ -1,0 +1,2289 @@
+{
+  "metaDataInfo": {
+    "Host name": "ip-10-0-1-145.ec2.internal",
+    "Exported by": "admin",
+    "Export time": "Mar 24, 2020 3:18:47 PM",
+    "Ranger apache version": "2.1.0-SNAPSHOT"
+  },
+  "policies": [
+    {
+      "service": "cl1_hadoop",
+      "name": "kms-audit-path",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Policy for kms-audit-path",
+      "isAuditEnabled": true,
+      "resources": {
+        "path": {
+          "values": [
+            "/ranger/audit/kms"
+          ],
+          "isExcludes": false,
+          "isRecursive": true
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "execute",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "keyadmin"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "awss3",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 1,
+      "guid": "3e993d5b-99ef-4f36-aaec-8ae13c99b1c1",
+      "isEnabled": true,
+      "version": 1
+    },
+    {
+      "service": "hadoopdev",
+      "name": "all - path",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Policy for all - path",
+      "isAuditEnabled": false,
+      "resources": {
+        "path": {
+          "values": [
+            "/*"
+          ],
+          "isExcludes": false,
+          "isRecursive": true
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "execute",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "policymgr"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": true
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hdfs",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 3,
+      "guid": "d7424829-9caf-492f-b687-df2de8923948",
+      "isEnabled": true,
+      "version": 4
+    },
+    {
+      "service": "hadoopdev",
+      "name": "kms-audit-path",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Policy for kms-audit-path",
+      "isAuditEnabled": false,
+      "resources": {
+        "path": {
+          "values": [
+            "/ranger/audit/kms"
+          ],
+          "isExcludes": false,
+          "isRecursive": true
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "execute",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "keyadmin"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hdfs",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 4,
+      "guid": "c88abd6c-290a-46aa-b869-d10280753045",
+      "isEnabled": true,
+      "version": 2
+    },
+    {
+      "service": "hivedev",
+      "name": "all - database",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Policy for all - database",
+      "isAuditEnabled": true,
+      "resources": {
+        "database": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            },
+            {
+              "type": "update",
+              "isAllowed": true
+            },
+            {
+              "type": "create",
+              "isAllowed": true
+            },
+            {
+              "type": "drop",
+              "isAllowed": true
+            },
+            {
+              "type": "alter",
+              "isAllowed": true
+            },
+            {
+              "type": "index",
+              "isAllowed": true
+            },
+            {
+              "type": "lock",
+              "isAllowed": true
+            },
+            {
+              "type": "all",
+              "isAllowed": true
+            },
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "repladmin",
+              "isAllowed": true
+            },
+            {
+              "type": "serviceadmin",
+              "isAllowed": true
+            },
+            {
+              "type": "tempudfadmin",
+              "isAllowed": true
+            },
+            {
+              "type": "refresh",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "policymgr_hive"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": true
+        },
+        {
+          "accesses": [
+            {
+              "type": "create",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "public"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        },
+        {
+          "accesses": [
+            {
+              "type": "all",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "{OWNER}"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": true
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 5,
+      "guid": "6eb9f1be-7b0b-43d8-9e74-2487e46fd006",
+      "isEnabled": true,
+      "version": 1
+    },
+    {
+      "service": "hivedev",
+      "name": "all - hiveservice",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Policy for all - hiveservice",
+      "isAuditEnabled": true,
+      "resources": {
+        "hiveservice": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            },
+            {
+              "type": "update",
+              "isAllowed": true
+            },
+            {
+              "type": "create",
+              "isAllowed": true
+            },
+            {
+              "type": "drop",
+              "isAllowed": true
+            },
+            {
+              "type": "alter",
+              "isAllowed": true
+            },
+            {
+              "type": "index",
+              "isAllowed": true
+            },
+            {
+              "type": "lock",
+              "isAllowed": true
+            },
+            {
+              "type": "all",
+              "isAllowed": true
+            },
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "repladmin",
+              "isAllowed": true
+            },
+            {
+              "type": "serviceadmin",
+              "isAllowed": true
+            },
+            {
+              "type": "tempudfadmin",
+              "isAllowed": true
+            },
+            {
+              "type": "refresh",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "policymgr_hive"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": true
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 6,
+      "guid": "fcb3acf7-009c-495d-902b-bc693d7e1821",
+      "isEnabled": true,
+      "version": 1
+    },
+    {
+      "service": "hivedev",
+      "name": "all - database, table, column",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Policy for all - database, table, column",
+      "isAuditEnabled": true,
+      "resources": {
+        "database": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "column": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "table": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            },
+            {
+              "type": "update",
+              "isAllowed": true
+            },
+            {
+              "type": "create",
+              "isAllowed": true
+            },
+            {
+              "type": "drop",
+              "isAllowed": true
+            },
+            {
+              "type": "alter",
+              "isAllowed": true
+            },
+            {
+              "type": "index",
+              "isAllowed": true
+            },
+            {
+              "type": "lock",
+              "isAllowed": true
+            },
+            {
+              "type": "all",
+              "isAllowed": true
+            },
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "repladmin",
+              "isAllowed": true
+            },
+            {
+              "type": "serviceadmin",
+              "isAllowed": true
+            },
+            {
+              "type": "tempudfadmin",
+              "isAllowed": true
+            },
+            {
+              "type": "refresh",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "policymgr_hive"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": true
+        },
+        {
+          "accesses": [
+            {
+              "type": "all",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "{OWNER}"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": true
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 7,
+      "guid": "67066a85-857b-480e-9669-5a716c27c0f2",
+      "isEnabled": true,
+      "version": 5
+    },
+    {
+      "service": "hivedev",
+      "name": "all - database, table",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Policy for all - database, table",
+      "isAuditEnabled": true,
+      "resources": {
+        "database": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "table": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            },
+            {
+              "type": "update",
+              "isAllowed": true
+            },
+            {
+              "type": "create",
+              "isAllowed": true
+            },
+            {
+              "type": "drop",
+              "isAllowed": true
+            },
+            {
+              "type": "alter",
+              "isAllowed": true
+            },
+            {
+              "type": "index",
+              "isAllowed": true
+            },
+            {
+              "type": "lock",
+              "isAllowed": true
+            },
+            {
+              "type": "all",
+              "isAllowed": true
+            },
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "repladmin",
+              "isAllowed": true
+            },
+            {
+              "type": "serviceadmin",
+              "isAllowed": true
+            },
+            {
+              "type": "tempudfadmin",
+              "isAllowed": true
+            },
+            {
+              "type": "refresh",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "policymgr_hive"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": true
+        },
+        {
+          "accesses": [
+            {
+              "type": "all",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "{OWNER}"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": true
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 8,
+      "guid": "fe5dff7f-4024-4c69-bf20-8fea968a71c8",
+      "isEnabled": true,
+      "version": 1
+    },
+    {
+      "service": "hivedev",
+      "name": "all - database, udf",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Policy for all - database, udf",
+      "isAuditEnabled": true,
+      "resources": {
+        "database": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "udf": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            },
+            {
+              "type": "update",
+              "isAllowed": true
+            },
+            {
+              "type": "create",
+              "isAllowed": true
+            },
+            {
+              "type": "drop",
+              "isAllowed": true
+            },
+            {
+              "type": "alter",
+              "isAllowed": true
+            },
+            {
+              "type": "index",
+              "isAllowed": true
+            },
+            {
+              "type": "lock",
+              "isAllowed": true
+            },
+            {
+              "type": "all",
+              "isAllowed": true
+            },
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "repladmin",
+              "isAllowed": true
+            },
+            {
+              "type": "serviceadmin",
+              "isAllowed": true
+            },
+            {
+              "type": "tempudfadmin",
+              "isAllowed": true
+            },
+            {
+              "type": "refresh",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "policymgr_hive"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": true
+        },
+        {
+          "accesses": [
+            {
+              "type": "all",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "{OWNER}"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": true
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 9,
+      "guid": "18272046-7465-44b2-8cf2-5a94c288ec17",
+      "isEnabled": true,
+      "version": 1
+    },
+    {
+      "service": "hivedev",
+      "name": "all - url",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Policy for all - url",
+      "isAuditEnabled": true,
+      "resources": {
+        "url": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": true
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            },
+            {
+              "type": "update",
+              "isAllowed": true
+            },
+            {
+              "type": "create",
+              "isAllowed": true
+            },
+            {
+              "type": "drop",
+              "isAllowed": true
+            },
+            {
+              "type": "alter",
+              "isAllowed": true
+            },
+            {
+              "type": "index",
+              "isAllowed": true
+            },
+            {
+              "type": "lock",
+              "isAllowed": true
+            },
+            {
+              "type": "all",
+              "isAllowed": true
+            },
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "repladmin",
+              "isAllowed": true
+            },
+            {
+              "type": "serviceadmin",
+              "isAllowed": true
+            },
+            {
+              "type": "tempudfadmin",
+              "isAllowed": true
+            },
+            {
+              "type": "refresh",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "policymgr_hive"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": true
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 10,
+      "guid": "9c75391a-8792-4444-ab3a-8584be341e6c",
+      "isEnabled": true,
+      "version": 1
+    },
+    {
+      "service": "hivedev",
+      "name": "default database tables columns",
+      "policyType": 0,
+      "policyPriority": 0,
+      "isAuditEnabled": true,
+      "resources": {
+        "database": {
+          "values": [
+            "default"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "column": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "table": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "create",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "public"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 11,
+      "guid": "1a640ca0-d1c1-4b4f-aaab-fed2d9996787",
+      "isEnabled": true,
+      "version": 1
+    },
+    {
+      "service": "hivedev",
+      "name": "Information_schema database tables columns",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "",
+      "isAuditEnabled": true,
+      "resources": {
+        "database": {
+          "values": [
+            "information_schema"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "column": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "table": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "analyst1"
+          ],
+          "groups": [
+            "public"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 12,
+      "guid": "ec1fddb4-0686-467f-a4d2-e984928ac3a2",
+      "isEnabled": true,
+      "version": 2
+    },
+    {
+      "service": "hadoopdev",
+      "name": "Analyst1Policy",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Home",
+      "isAuditEnabled": false,
+      "resources": {
+        "path": {
+          "values": [
+            "/user/analyst1"
+          ],
+          "isExcludes": false,
+          "isRecursive": true
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "execute",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "analyst1"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hdfs",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": true,
+      "id": 13,
+      "guid": "419640f0-0b0d-4ab2-9053-b695d8c11fce",
+      "isEnabled": true,
+      "version": 3
+    },
+    {
+      "service": "hadoopdev",
+      "name": "Analyst2Policy",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Home",
+      "isAuditEnabled": false,
+      "resources": {
+        "path": {
+          "values": [
+            "/user/analyst2/"
+          ],
+          "isExcludes": false,
+          "isRecursive": true
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "execute",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "analyst2"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hdfs",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": true,
+      "id": 14,
+      "guid": "fd41f259-8c30-456f-810f-dd64e8f82d11",
+      "isEnabled": true,
+      "version": 4
+    },
+    {
+      "service": "hivedev",
+      "name": "Analyst1Policy",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Hive Policy",
+      "isAuditEnabled": true,
+      "resources": {
+        "database": {
+          "values": [
+            "default"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "column": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "table": {
+          "values": [
+            "tblanalyst1"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "all",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "analyst1"
+          ],
+          "groups": [],
+          "roles": [
+            "Adminrole"
+          ],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 15,
+      "guid": "c233ec11-259b-4d2b-931c-e6f74dc42184",
+      "isEnabled": true,
+      "version": 6
+    },
+    {
+      "service": "prestodev",
+      "name": "all - catalog, schema",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Policy for all - catalog, schema",
+      "isAuditEnabled": true,
+      "resources": {
+        "schema": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "catalog": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            },
+            {
+              "type": "insert",
+              "isAllowed": true
+            },
+            {
+              "type": "create",
+              "isAllowed": true
+            },
+            {
+              "type": "drop",
+              "isAllowed": true
+            },
+            {
+              "type": "use",
+              "isAllowed": true
+            },
+            {
+              "type": "alter",
+              "isAllowed": true
+            },
+            {
+              "type": "admin",
+              "isAllowed": true
+            },
+            {
+              "type": "all",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "business_group"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": true
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "presto",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 17,
+      "guid": "1a9dd0ca-fd6e-4e08-9453-a36eb46b2c21",
+      "isEnabled": true,
+      "version": 28
+    },
+    {
+      "service": "prestodev",
+      "name": "InformationSchema",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Policy for InformationSchema",
+      "isAuditEnabled": true,
+      "resources": {
+        "schema": {
+          "values": [
+            "information_schema"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "catalog": {
+          "values": [
+            "hive",
+            "athena",
+            "redshift"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "column": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "table": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            },
+            {
+              "type": "insert",
+              "isAllowed": true
+            },
+            {
+              "type": "create",
+              "isAllowed": true
+            },
+            {
+              "type": "drop",
+              "isAllowed": true
+            },
+            {
+              "type": "use",
+              "isAllowed": true
+            },
+            {
+              "type": "alter",
+              "isAllowed": true
+            },
+            {
+              "type": "admin",
+              "isAllowed": true
+            },
+            {
+              "type": "all",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "data_engineer",
+            "data_curator",
+            "data_scientist",
+            "hadoop_analyst",
+            "business_group"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": true
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "presto",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 21,
+      "guid": "41d95041-5516-4f43-968b-60e113748442",
+      "isEnabled": true,
+      "version": 24
+    },
+    {
+      "service": "cl1_hadoop",
+      "name": "All access",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "All access",
+      "isAuditEnabled": true,
+      "resources": {
+        "path": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": true
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "execute",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "hadoop"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "awss3",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 24,
+      "guid": "dd32dbbb-700a-4ef9-b21e-fe43d8213a47",
+      "isEnabled": true,
+      "version": 6
+    },
+    {
+      "service": "cl1_hadoop",
+      "name": "Staging and Processed Data zones",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "",
+      "isAuditEnabled": true,
+      "resources": {
+        "path": {
+          "values": [
+            "s3://aws-datalake-security-data-vbhamidi-us-east-1/processed/*"
+          ],
+          "isExcludes": false,
+          "isRecursive": true
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "execute",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "data_engineer"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "awss3",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [
+        "DataEngineer"
+      ],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 25,
+      "guid": "14049c5e-7f5f-4015-af98-915974727e4f",
+      "isEnabled": true,
+      "version": 54
+    },
+    {
+      "service": "prestodev",
+      "name": "Redshift Access for Business User",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "",
+      "isAuditEnabled": true,
+      "resources": {
+        "schema": {
+          "values": [
+            "public"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "catalog": {
+          "values": [
+            "redshift"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "column": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "table": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            },
+            {
+              "type": "insert",
+              "isAllowed": true
+            },
+            {
+              "type": "create",
+              "isAllowed": true
+            },
+            {
+              "type": "drop",
+              "isAllowed": true
+            },
+            {
+              "type": "use",
+              "isAllowed": true
+            },
+            {
+              "type": "alter",
+              "isAllowed": true
+            },
+            {
+              "type": "admin",
+              "isAllowed": true
+            },
+            {
+              "type": "all",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "business_group"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "presto",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [
+        "BusinessGroup"
+      ],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 26,
+      "guid": "ebedea13-c55e-40f8-9b58-b1fa3965caa5",
+      "isEnabled": true,
+      "version": 22
+    },
+    {
+      "service": "prestodev",
+      "name": "Athena Access for DataAnalysts",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "",
+      "isAuditEnabled": true,
+      "resources": {
+        "schema": {
+          "values": [
+            "staging"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "catalog": {
+          "values": [
+            "athena"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "column": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "table": {
+          "values": [
+            "products"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            },
+            {
+              "type": "insert",
+              "isAllowed": true
+            },
+            {
+              "type": "create",
+              "isAllowed": true
+            },
+            {
+              "type": "drop",
+              "isAllowed": true
+            },
+            {
+              "type": "use",
+              "isAllowed": true
+            },
+            {
+              "type": "alter",
+              "isAllowed": true
+            },
+            {
+              "type": "admin",
+              "isAllowed": true
+            },
+            {
+              "type": "all",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "business_group"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "presto",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [
+        "BusinessGroup"
+      ],
+      "zoneName": "",
+      "isDenyAllElse": true,
+      "id": 33,
+      "guid": "5af8fbaa-b0bc-4bd2-a49f-2f2795eb4eba",
+      "isEnabled": true,
+      "version": 21
+    },
+    {
+      "service": "hivedev",
+      "name": "CustomerData",
+      "policyType": 1,
+      "policyPriority": 0,
+      "description": "",
+      "isAuditEnabled": true,
+      "resources": {
+        "database": {
+          "values": [
+            "staging"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "column": {
+          "values": [
+            "first_name"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "table": {
+          "values": [
+            "customers"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [
+        {
+          "dataMaskInfo": {
+            "dataMaskType": "MASK_HASH",
+            "valueExpr": ""
+          },
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "hadoop_analyst"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [
+        "PII"
+      ],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 36,
+      "guid": "9f69ce71-fb48-4bc8-bed8-a61b4c4676ea",
+      "isEnabled": true,
+      "version": 10
+    },
+    {
+      "service": "hivedev",
+      "name": "Staging schema Full Access",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "",
+      "isAuditEnabled": true,
+      "resources": {
+        "database": {
+          "values": [
+            "staging"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "column": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "table": {
+          "values": [
+            "products",
+            "orders"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "data_scientist"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        },
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "hadoop_analyst"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [
+        "DataAnalyst",
+        "DataScientist"
+      ],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 41,
+      "guid": "8bdb1450-6961-436d-ad05-297f11d72d84",
+      "isEnabled": true,
+      "version": 21
+    },
+    {
+      "service": "hivedev",
+      "name": "Processed schema Access",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "",
+      "isAuditEnabled": true,
+      "resources": {
+        "database": {
+          "values": [
+            "processed"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "column": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "table": {
+          "values": [
+            "sales"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            },
+            {
+              "type": "update",
+              "isAllowed": true
+            },
+            {
+              "type": "create",
+              "isAllowed": true
+            },
+            {
+              "type": "drop",
+              "isAllowed": true
+            },
+            {
+              "type": "alter",
+              "isAllowed": true
+            },
+            {
+              "type": "index",
+              "isAllowed": true
+            },
+            {
+              "type": "lock",
+              "isAllowed": true
+            },
+            {
+              "type": "all",
+              "isAllowed": true
+            },
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "repladmin",
+              "isAllowed": true
+            },
+            {
+              "type": "serviceadmin",
+              "isAllowed": true
+            },
+            {
+              "type": "tempudfadmin",
+              "isAllowed": true
+            },
+            {
+              "type": "refresh",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "data_engineer"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        },
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "hadoop_analyst"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        },
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "business_group"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [
+        "BusinessGroup",
+        "DataAnalyst",
+        "DataEngineer"
+      ],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 42,
+      "guid": "7a30e5e4-a6bd-4d96-b34f-7a81dfeea85d",
+      "isEnabled": true,
+      "version": 6
+    },
+    {
+      "service": "cl1_hadoop",
+      "name": "Staging data zone",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "",
+      "isAuditEnabled": true,
+      "resources": {
+        "path": {
+          "values": [
+            "s3://aws-datalake-security-data-vbhamidi-us-east-1/staging/*"
+          ],
+          "isExcludes": false,
+          "isRecursive": true
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "read",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "data_scientist"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        },
+        {
+          "accesses": [
+            {
+              "type": "read",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "hadoop_analyst"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        },
+        {
+          "accesses": [
+            {
+              "type": "read",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "data_engineer"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "awss3",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [
+        "DataAnalyst",
+        "DataEngineer",
+        "DataScientist"
+      ],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 43,
+      "guid": "9927e6fa-c64d-498b-9e76-cb4f51b84111",
+      "isEnabled": true,
+      "version": 6
+    },
+    {
+      "service": "hivedev",
+      "name": "Staging access - customers",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "",
+      "isAuditEnabled": true,
+      "resources": {
+        "database": {
+          "values": [
+            "staging"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "column": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "table": {
+          "values": [
+            "customers"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "hadoop_analyst"
+          ],
+          "roles": [
+            "AnalystEnginner"
+          ],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [
+        "DataAnalyst",
+        "PHI"
+      ],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 44,
+      "guid": "d96bfb59-9e3a-42ef-b498-9a5ebac92468",
+      "isEnabled": true,
+      "version": 7
+    },
+    {
+      "service": "hivedev",
+      "name": "Staging access - orders - limited columns",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "",
+      "isAuditEnabled": true,
+      "resources": {
+        "database": {
+          "values": [
+            "staging"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "column": {
+          "values": [
+            "order_date",
+            "price",
+            "sku"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "table": {
+          "values": [
+            "orders"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "data_engineer"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [
+        "DataEngineer",
+        "SALES"
+      ],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 45,
+      "guid": "291dc189-5fd8-40b6-9954-981ec424b508",
+      "isEnabled": true,
+      "version": 6
+    },
+    {
+      "service": "hivedev",
+      "name": "Staging access - products",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "",
+      "isAuditEnabled": true,
+      "resources": {
+        "database": {
+          "values": [
+            "staging"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "column": {
+          "values": [
+            "*"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        },
+        "table": {
+          "values": [
+            "products"
+          ],
+          "isExcludes": false,
+          "isRecursive": false
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "select",
+              "isAllowed": true
+            }
+          ],
+          "users": [],
+          "groups": [
+            "data_engineer"
+          ],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hive",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [
+        "DataEngineer"
+      ],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 46,
+      "guid": "3b0673d5-0d03-4ccf-9256-fd4e2eb95219",
+      "isEnabled": true,
+      "version": 3
+    }
+  ],
+  "startIndex": 0,
+  "pageSize": 0,
+  "totalCount": 0,
+  "resultSize": 0,
+  "queryTimeMS": 1585063127275
+}

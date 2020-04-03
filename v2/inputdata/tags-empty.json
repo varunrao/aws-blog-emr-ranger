@@ -1,0 +1,14 @@
+{
+  "op":"replace",
+  "tagVersion":3,
+  "tagDefinitions":{
+  },
+  "tags":{
+  },
+  "serviceResources":[
+
+  ],
+  "serviceName":"hivedev",
+  "resourceToTagIds":{
+  }
+}

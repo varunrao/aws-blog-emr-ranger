@@ -1,0 +1,530 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: This template creates a security configuration and launches a kerberized
+  Amazon EMR cluster. Name=c6398801-5e29-461c-a624-c96a45ae033c
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Cross-realm Trust Configuration
+        Parameters:
+          - DomainDNSName
+          - DomainAdminUser
+          - ADDomainJoinPassword
+          - CrossRealmTrustPrincipalPassword
+      - Label:
+          default: Cluster Configuration
+        Parameters:
+          - KeyName
+          - ClusterSubnetID
+          - ClusterSecurityGroup
+          - TypeOfInstance
+          - InstanceCount
+          - AllowedCIDR
+          - AppsEMR
+      - Label:
+          default: EMR Kerberos Configuration
+        Parameters:
+          - KerberosRealm
+          - KerberosADdomain
+      - Label:
+          default: KNOX Configuration
+        Parameters:
+          - LDAPHostPrivateIP
+          - LDAPBindUserName
+          - LDAPBindPassword
+          - LDAPSearchBase
+          - LDAPUserSearchAttribute
+          - LDAPUserObjectClass
+          - LDAPGroupSearchBase
+          - LDAPGroupObjectClass
+          - LDAPMemberAttribute
+    ParameterLabels:
+      DomainDNSName:
+        default: 'Active Directory domain: '
+      DomainAdminUser:
+        default: 'Domain admin user (joiner user): '
+      ADDomainJoinPassword:
+        default: 'Domain admin password: '
+      CrossRealmTrustPrincipalPassword:
+        default: 'Cross-realm trust password: '
+      KeyName:
+        default: 'EC2 key pair name: '
+      ClusterSubnetID:
+        default: 'Subnet ID: '
+      ClusterSecurityGroup:
+        default: 'Security group ID: '
+      AllowedCIDR:
+        default: 'Allowed IP address: '
+      TypeOfInstance:
+        default: 'Instance type: '
+      InstanceCount:
+        default: 'Instance count: '
+      KerberosRealm:
+        default: 'EMR Kerberos realm: '
+      KerberosADdomain:
+        default: 'Trusted AD domain: '
+      AppsEMR:
+        default: 'EMR applications: '
+      LDAPHostPrivateIP:
+        default: Ldap Host Private IP address
+      LDAPBindUserName:
+        default: 'Ldap Bind user Name: '
+      LDAPBindPassword:
+        default: 'Ldap Bind user password: '
+      LDAPSearchBase:
+        default: 'Ldap search base: '
+      LDAPUserSearchAttribute:
+        default: 'Ldap user search attribute: '
+      LDAPUserObjectClass:
+        default: 'Ldap user object class: '
+      LDAPGroupSearchBase:
+        default: 'Ldap group search base: '
+      LDAPGroupObjectClass:
+        default: 'Ldap group object class: '
+      LDAPMemberAttribute:
+        default: 'Ldap member attribute: '
+Parameters:
+  VPC:
+    Description: Select the Virtual Private Cloud (VPC) that was created
+    Type: AWS::EC2::VPC::Id
+  S3Bucket:
+    Description: S3Bucket where artifacts are stored
+    Type: String
+    Default: aws-bigdata-blog
+  S3Key:
+    Description: S3Key of the Lambda code
+    Type: String
+  EMRLogDir:
+    Description: Log directory for EMR. Eg - s3://xxx
+    Type: String
+    AllowedPattern: "^s3://.*"
+  ClusterSubnetID:
+    Description: ID of an existing subnet for the Amazon EMR cluster
+    Type: AWS::EC2::Subnet::Id
+  AllowedCIDR:
+    Description: IP address range (in CIDR notation) of the client that will be allowed
+      to connect to the cluster using SSH e.g., 203.0.113.5/32
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    Type: String
+    MinLength: '9'
+    MaxLength: '18'
+    Default: 10.0.0.0/16
+    ConstraintDescription: must be a valid CIDR range of the form x.x.x.x/x
+  KeyName:
+    Description: Name of an existing EC2 key pair to access the Amazon EMR cluster
+    Type: AWS::EC2::KeyPair::KeyName
+  DomainDNSName:
+    AllowedPattern: '[a-zA-Z0-9\-]+\..+'
+    Default: awsemr.com
+    Description: The Active Directory domain that you want to establish the cross-realm
+      trust with e.g., awsemr.com
+    MaxLength: '25'
+    MinLength: '3'
+    Type: String
+  CrossRealmTrustPrincipalPassword:
+    Description: Password of your cross-realm trust
+    MaxLength: '32'
+    MinLength: '5'
+    NoEcho: 'true'
+    Type: String
+  ADDomainJoinPassword:
+    Description: Password of the domain admin (joiner user) account
+    NoEcho: 'true'
+    Type: String
+  DomainAdminUser:
+    AllowedPattern: '[a-zA-Z0-9]*'
+    Default: awsadmin
+    Description: User name of an AD account with computer join privileges
+    MaxLength: '25'
+    MinLength: '5'
+    Type: String
+  KerberosRealm:
+    AllowedPattern: '[a-zA-Z0-9\-]+\..+'
+    Default: EC2.INTERNAL
+    Description: Cluster's Kerberos realm name. This is usually the VPC's domain name
+      in uppercase letters e.g. EC2.INTERNAL
+    MaxLength: '25'
+    MinLength: '3'
+    Type: String
+  KerberosADdomain:
+    AllowedPattern: '[a-zA-Z0-9\-]+\..+'
+    Default: AWSEMR.COM
+    Description: The AD domain that you want to trust. This is the same as the AD
+      domain name, but in uppercase letters e.g., AWSEMR.COM
+    MaxLength: '25'
+    MinLength: '3'
+    Type: String
+  InstanceCount:
+    Default: 3
+    Description: Number of instances (core nodes) for the cluster e.g., 2
+    Type: Number
+  TypeOfInstance:
+    Description: Instance type for the cluster nodes
+    Type: String
+    Default: r5.2xlarge
+    AllowedValues:
+      - m4.large
+      - m4.xlarge
+      - m4.2xlarge
+      - m4.4xlarge
+      - r5.2xlarge
+  emrReleaseLabel:
+    Default: emr-5.29.0
+    AllowedValues:
+      - emr-5.0.0
+      - emr-5.4.0
+      - emr-5.16.0
+      - emr-5.17.0
+      - emr-5.26.0
+      - emr-5.27.0
+      - emr-5.28.0
+      - emr-5.28.1
+      - emr-5.29.0
+      - emr-6.0.0
+    Description: Release label for the EMR cluster
+    Type: String
+  AppsEMR:
+    Description: 'Comma separated list of applications to install on the cluster e.g., '
+    Type: String
+    Default: Hadoop, Spark, Hive, HBase, Livy, Presto, Hue
+  EnableKerberos:
+    Description: Enable Kerberos on the Cluster
+    Default: true
+    Type: String
+  EnablePrestoKerberos:
+    Description: Update to enable Kerberos for Presto
+    Default: false
+    Type: String
+    AllowedValues: [true, false]
+  InstallS3Plugin:
+    Description: Install Ranger S3 EMRFS plugin
+    Default: true
+    Type: String
+    AllowedValues: [true, false]
+  LDAPHostPrivateIP:
+    Description: Ldap Host Private IP address
+    Type: String
+  LDAPBindUserName:
+    Description: Ldap Bind user name
+    Type: String
+    Default: CN=awsadmin,CN=Users,DC=awsemr,DC=com
+    AllowedValues:
+      - CN=awsadmin,CN=Users,DC=awsemr,DC=com
+  LDAPBindPassword:
+    Description: Ldap Bind user password that was used in the previous cloud formation
+      template
+    Type: String
+    NoEcho: 'true'
+  LDAPSearchBase:
+    Description: Ldap search base
+    Type: String
+    Default: CN=Users,DC=awsemr,DC=com
+    AllowedValues:
+      - CN=Users,DC=awsemr,DC=com
+  LDAPUserSearchAttribute:
+    Description: Ldap user search attribute
+    Type: String
+    Default: sAMAccountName
+    AllowedValues:
+      - sAMAccountName
+  LDAPUserObjectClass:
+    Description: Ldap user object class
+    Type: String
+    Default: person
+    AllowedValues:
+      - person
+  LDAPGroupSearchBase:
+    Description: Ldap group search
+    Type: String
+    Default: dc=awsemr,dc=com
+    AllowedValues:
+      - dc=awsemr,dc=com
+  LDAPGroupObjectClass:
+    Description: Ldap group object class
+    Type: String
+    Default: group
+    AllowedValues:
+      - group
+  LDAPMemberAttribute:
+    Description: Ldap member attribute
+    Type: String
+    Default: member
+    AllowedValues:
+      - member
+  RangerHostname:
+    Description: Ranger Host IP Address
+    Type: String
+  rangerVersion:
+    Description: RangerVersion
+    Type: String
+    Default: '2.0'
+    AllowedValues:
+      - '0.6'
+      - '0.7'
+      - '1.0'
+      - '2.0'
+Conditions:
+  EnableKerberos:
+    !Equals [true, !Ref EnableKerberos]
+Resources:
+  EMRMasterSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn: ServiceAccessSecurityGroup
+    Properties:
+      GroupDescription: CloudFormationGroup
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: '-1'
+          CidrIp: 10.0.0.0/16
+      Tags:
+        - Key: Name
+          Value: AWSEMREMRMasterSecurityGroup
+  ClusterSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn: EMRMasterSecurityGroup
+    Properties:
+      GroupDescription: CloudFormationGroup
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: '-1'
+          CidrIp: 10.0.0.0/16
+      Tags:
+        - Key: Name
+          Value: AWSEMRSecurityGroup
+
+  ServiceAccessSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: CloudFormationGroup
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: '-1'
+          CidrIp: 10.0.0.0/16
+      Tags:
+        - Key: Name
+          Value: AWSEMREMRServiceAccessSecurityGroup
+  InboundRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: '22'
+      ToPort: '22'
+      CidrIp: !Ref 'AllowedCIDR'
+      GroupId: !Ref 'EMRMasterSecurityGroup'
+  InboundRknoxRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: '8449'
+      ToPort: '8449'
+      CidrIp: !Ref 'AllowedCIDR'
+      GroupId: !Ref 'EMRMasterSecurityGroup'
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonElasticMapReduceFullAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaRole
+  EmrServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - elasticmapreduce.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceRole
+  EmrEc2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforEC2Role
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/AmazonAthenaFullAccess
+        - !Sub "arn:aws:iam::${AWS::AccountId}:policy/AthenaPrimaryGroupAccessPolicy"
+  EMRInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref 'EmrEc2Role'
+  SecurityConfiguration:
+    Type: AWS::EMR::SecurityConfiguration
+    Condition: EnableKerberos
+    Properties:
+      SecurityConfiguration:
+        EncryptionConfiguration:
+          EnableAtRestEncryption: false
+          EnableInTransitEncryption: true
+          InTransitEncryptionConfiguration:
+            TLSCertificateConfiguration:
+              CertificateProviderType: PEM
+              S3Object: !Join ['', ["s3://", !Ref S3Bucket, "/", !Ref S3Key,
+                                    '/emr-tls/emr-certs.zip']]
+        AuthenticationConfiguration:
+          KerberosConfiguration:
+            Provider: ClusterDedicatedKdc
+            ClusterDedicatedKdcConfiguration:
+              TicketLifetimeInHours: 24
+              CrossRealmTrustConfiguration:
+                Realm: !Ref 'KerberosADdomain'
+                Domain: !Ref 'DomainDNSName'
+                AdminServer: !Ref 'DomainDNSName'
+                KdcServer: !Ref 'DomainDNSName'
+        AuthorizationConfiguration:
+          EmrFsConfiguration:
+            RoleMappings:
+            - Role: !Join
+                - ':'
+                - - arn
+                  - aws
+                  - iam
+                  - ''
+                  - !Ref 'AWS::AccountId'
+                  - "role/DeveloperRole"
+              IdentifierType: Group
+              Identifiers:
+                - developer
+            - Role: !Join
+                - ':'
+                - - arn
+                  - aws
+                  - iam
+                  - ''
+                  - !Ref 'AWS::AccountId'
+                  - "role/AnalystRole"
+              IdentifierType: Group
+              Identifiers:
+                - analyst
+            - Role: !Join
+                - ':'
+                - - arn
+                  - aws
+                  - iam
+                  - ''
+                  - !Ref 'AWS::AccountId'
+                  - "role/Customer_CompanyARole"
+              IdentifierType: Group
+              Identifiers:
+                - customer_companyA
+            - Role: !Join
+                - ':'
+                - - arn
+                  - aws
+                  - iam
+                  - ''
+                  - !Ref 'AWS::AccountId'
+                  - "role/Businessuser_Product1Role"
+              IdentifierType: Group
+              Identifiers:
+                - businessuser_product1
+
+  #    AuthenticationConfiguration:
+  #      KerberosConfiguration:
+  #        ClusterDedicatedKdcConfiguration:
+  #          CrossRealmTrustConfiguration:
+  #            Realm: !Ref 'KerberosADdomain'
+  #            KdcServer: !Ref 'DomainDNSName'
+  #            Domain: !Ref 'DomainDNSName'
+  #            AdminServer: !Ref 'DomainDNSName'
+  #          TicketLifetimeInHours: 24
+  #        Provider: ClusterDedicatedKdc
+  LaunchEMRClusterFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: LambdaExecutionRole
+    Properties:
+      Handler: cremr.handler
+      Role: !GetAtt 'LambdaExecutionRole.Arn'
+      Code:
+        S3Bucket: !Ref S3Bucket
+        S3Key: !Join ['', [!Ref S3Key,
+                           '/launch-cluster.zip']]
+      Runtime: python3.6
+      Timeout: '300'
+  LaunchKerberizedCluster:
+    Type: AWS::CloudFormation::CustomResource
+    DependsOn: LaunchEMRClusterFunction
+    Version: '1.0'
+    Properties:
+      ServiceToken: !GetAtt 'LaunchEMRClusterFunction.Arn'
+      SignalURL: !Ref 'emrCreateWaitHandle'
+      loglevel: info
+      subnetID: !Ref 'ClusterSubnetID'
+      JobFlowRole: !Ref 'EMRInstanceProfile'
+      ServiceRole: !Ref 'EmrServiceRole'
+      masterSG: !Ref 'EMRMasterSecurityGroup'
+      slaveSG: !Ref 'ClusterSecurityGroup'
+      serviceSG: !Ref 'ServiceAccessSecurityGroup'
+      S3Bucket: !Ref 'S3Bucket'
+      S3Key: !Ref 'S3Key'
+      EMRSecurityConfig: !If
+        - EnableKerberos
+        - !Ref 'SecurityConfiguration'
+        - "false"
+      LogFolder: !Ref EMRLogDir
+      KeyName: !Ref 'KeyName'
+      StackName: !Ref 'AWS::StackName'
+      StackRegion: !Ref 'AWS::Region'
+      CrossRealmPass: !Ref 'CrossRealmTrustPrincipalPassword'
+      ADDomainUserPassword: !Ref 'ADDomainJoinPassword'
+      ADDomainUser: !Ref 'DomainAdminUser'
+      KerberosRealm: !Ref 'KerberosRealm'
+      InstanceCount: !Ref 'InstanceCount'
+      TypeOfInstance: !Ref 'TypeOfInstance'
+      AppsEMR: !Ref 'AppsEMR'
+      emrReleaseLabel: !Ref emrReleaseLabel
+      DomainDNSName: !Ref 'DomainDNSName'
+      LDAPHostPrivateIP: !Ref 'LDAPHostPrivateIP'
+      LDAPBindUserName: !Ref 'LDAPBindUserName'
+      LDAPBindPassword: !Ref 'LDAPBindPassword'
+      LDAPSearchBase: !Ref 'LDAPSearchBase'
+      LDAPUserSearchAttribute: !Ref 'LDAPUserSearchAttribute'
+      LDAPUserObjectClass: !Ref 'LDAPUserObjectClass'
+      LDAPGroupSearchBase: !Ref 'LDAPGroupSearchBase'
+      LDAPGroupObjectClass: !Ref 'LDAPGroupObjectClass'
+      LDAPMemberAttribute: !Ref 'LDAPMemberAttribute'
+      RangerHostname: !Ref RangerHostname
+      RangerVersion: !Ref rangerVersion
+      EnablePrestoKerberos: !Ref EnablePrestoKerberos
+      InstallS3Plugin: !Ref InstallS3Plugin
+  emrCreateWaitHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+    Properties: {}
+  emrWaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    DependsOn: LaunchKerberizedCluster
+    Properties:
+      Handle: !Ref 'emrCreateWaitHandle'
+      Timeout: '4500'
+Outputs:
+  StackName:
+    Value: !Ref 'AWS::StackName'
+  EMRClusterID:
+    Value: !GetAtt 'LaunchKerberizedCluster.ClusterID'
+    Description: EMR cluster ID
+  EMRClusterURL:
+    Value: !GetAtt 'emrWaitCondition.Data'
+    Description: EMR master node URL

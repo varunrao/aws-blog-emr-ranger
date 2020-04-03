@@ -1,0 +1,15 @@
+{
+  "ClusterId": "j-2TFV75KFCN7Q9",
+  "InstanceGroups": [
+    {
+      "InstanceGroupId": "ig-2PW3J22XJ383J",
+      "Configurations": [
+        {
+          "Classification": "emrfs-site",
+          "Properties": {
+            "s3.authorization.enabled": "false"
+          },
+          "Configurations": []
+        }]
+    }]
+}

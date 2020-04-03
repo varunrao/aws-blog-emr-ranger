@@ -1,0 +1,9 @@
+{
+  "name": "cl1_hadoop",
+  "description": "Create AWSS3 Repo using CURL",
+  "type": "awss3",
+  "configs": {
+
+  },
+  "isEnabled": true
+}

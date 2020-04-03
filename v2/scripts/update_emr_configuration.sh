@@ -1,0 +1,1 @@
+aws emr modify-instance-groups --cli-input-json file://inputdata/emr-config.json --profile account1

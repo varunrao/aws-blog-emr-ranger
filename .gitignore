@@ -1,0 +1,11 @@
+/target/
+/v1/CloudFormationRunner.py
+/v2/CloudFormationRunner.py
+/v1/cr_zip_upload_to_s3.sh
+/v2/cr_zip_upload_to_s3.sh
+/v2/code/*.zip
+/.idea
+/v1/cloudformations/cfparameters
+/v2/cloudformations/cfparameters
+/v2/userqueries
+NOTES
