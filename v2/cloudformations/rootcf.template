@@ -87,15 +87,17 @@ Parameters:
   S3Bucket:
     Description: S3Bucket where artifacts are stored
     Type: String
-    Default: workshop-assets-us-east-1
+    Default: aws-bigdata-blog
   S3Key:
     Description: S3Key of the Lambda code
     Type: String
-    Default: datalake-security/artifacts/aws-blog-emr-knox
+    Default: artifacts/aws-blog-emr-ranger-v2
   MySQLDBPassword:
     Description: ' The RDS MySQL database password'
+    MaxLength: '41'
+    MinLength: '8'
+    NoEcho: 'true'
     Type: String
-    Default: RangerAdmin123
   DomainAdminPassword:
     AllowedPattern: (?=^.{6,255}$)((?=.*\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))^.*
     Description: 'Password for the domain admin user. Must be at least 8 characters
@@ -144,11 +146,6 @@ Parameters:
   EnableKerberos:
     Description: Enable Kerberos on the Cluster
     Default: true
-    Type: String
-    AllowedValues: [true, false]
-  EnablePrestoKerberos:
-    Description: Update to enable Kerberos for Presto
-    Default: false
     Type: String
     AllowedValues: [true, false]
   InstallS3Plugin:
@@ -402,7 +399,6 @@ Resources:
         LDAPHostPrivateIP: !GetAtt 'STEP2WinAD.Outputs.LDAPHostPrivateIP'
         rangerVersion: !Ref rangerVersion
         RangerHostname: !GetAtt 'STEP4RangerServer.Outputs.IPAddress'
-        EnablePrestoKerberos: !Ref EnablePrestoKerberos
         InstallS3Plugin: !Ref InstallS3Plugin
 Outputs:
   LDAPHostPrivateIP:

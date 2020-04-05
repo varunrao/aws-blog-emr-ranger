@@ -5,7 +5,11 @@ This is V1 of the blog post with the following basic setup.
 
 - AWS managed SimpleAD server
 - Apache Ranger EC2 instance with Solr
-- EMR cluster with Apache Ranger plugins installed
+- Apache EMR cluster with Apache Ranger plugins (Hive and HDFS)
+
+## Architecture
+
+![](../images/simple-ad-setup.png) 
 
 ## Contents
 

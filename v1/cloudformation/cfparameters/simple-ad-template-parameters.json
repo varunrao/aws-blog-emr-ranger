@@ -1,0 +1,13 @@
+{
+  "StackName": "SimpleADServer",
+  "Parameters": {
+    "DomainName": "corp.emr.local",
+    "DomainPassword": "Password@123",
+    "DomainShortName":"EmrSimpleAD",
+    "DefaultSubnet": "subnet-9ee25bc3",
+    "Subnet1SimpleAD": "subnet-7b159054",
+    "Subnet2SimpleAD": "subnet-9ee25bc3",
+    "KeyName": "varun1-enterprise-us-east-1",
+    "VPC": "vpc-a0a9fad8"
+  }
+}

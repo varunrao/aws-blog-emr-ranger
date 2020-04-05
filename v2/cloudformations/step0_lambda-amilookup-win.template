@@ -80,7 +80,7 @@ Parameters:
   S3Key:
     Description: The name of the ZIP package
     Type: String
-    Default: artifacts/aws-blog-emr-knox
+    Default: artifacts/aws-blog-emr-ranger-v2
 Resources:
   SampleInstance:
     Type: AWS::EC2::Instance

@@ -1,5 +1,5 @@
 {
-  "name": "cl1_hadoop",
+  "name": "awss3dev",
   "description": "Create AWSS3 Repo using CURL",
   "type": "awss3",
   "configs": {

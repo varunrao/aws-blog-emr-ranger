@@ -25,7 +25,7 @@ else
 fi
 
 ranger_s3bucket=$s3bucket/ranger/ranger-$ranger_download_version
-ranger_s3_plugin=ranger-$ranger_download_version-plugin-s3
+ranger_s3_plugin=ranger-$ranger_download_version-s3-plugin
 
 #Setup
 sudo rm -rf $installpath/s3
@@ -48,18 +48,7 @@ cd $installpath/s3/$ranger_s3_plugin
 sudo cp lib/* /usr/share/aws/emr/emrfs/lib/
 sudo sed -i "s|ranger_host|$ranger_fqdn|g" install/conf/ranger-awss3-audit.xml
 sudo sed -i "s|ranger_host|$ranger_fqdn|g" install/conf/ranger-awss3-security.xml
+sudo sed -i "s|service_name|awss3dev|g" install/conf/ranger-awss3-security.xml
 sudo cp install/conf/* /usr/share/aws/emr/emrfs/conf/
 sudo chmod -R 777 /usr/share/aws/emr/emrfs/conf/
 sudo chmod -R 777 /usr/share/aws/emr/emrfs/lib/
-#sudo cp /usr/lib/hive/httpmime-4.5.2.jar /usr/share/aws/emr/emrfs/lib/
-#sudo cp /usr/lib/hive/solr-solrj-5.5.1.jar /usr/share/aws/emr/emrfs/lib/
-#sudo touch /tmp/s3app.log
-sudo touch /tmp/awss3app.log
-sudo touch /tmp/awss3-ranger_audit.log
-sudo chmod 777 /tmp/awss3* || true
-#sudo rm -rf /tmp/s3app.log
-#sudo rm -rf /tmp/s3-ranger_audit.log
-#sudo touch /tmp/s3app.log
-#sudo touch /tmp/s3-ranger_audit.log
-#sudo chmod 777 /tmp/s3app.log
-#sudo chmod 777 /tmp/s3-ranger_audit.log

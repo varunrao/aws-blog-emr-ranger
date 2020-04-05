@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: ''
+Description: CloudFormation template for setting up a RDS instance to be used by the Apache Ranger server
 Parameters:
   VPC:
     Description: Select the Virtual Private Cloud (VPC) that was created
@@ -47,8 +47,10 @@ Parameters:
     - root
   MySQLDBPassword:
     Description: ' The RDS MySQL database password'
+    MaxLength: '41'
+    MinLength: '8'
+    NoEcho: 'true'
     Type: String
-    Default: RangerAdmin123
   MySQLDBAllocatedStorage:
     Description: ' The RDS MySQL database size (Gb)'
     Type: Number

@@ -14,6 +14,9 @@ This is V2 of the blog post with many updates
      * EMRFS S3 plugin (beta)
      * SparkSQL Plugin (beta)
 
+## Architecture
+
+![](../images/ad-kerberos.png) 
 
 #### Warning: The EMRFS S3 plugin only works when calls are made through EMRFS. By default Hive, Spark and Presto will use EMRFS. Direct access to S3 outside EMRFS will NOT be controlled by the Ranger policies.
 

@@ -26,7 +26,7 @@ def create(event, context):
 
     try:
         client = boto3.client("emr", region_name=event["ResourceProperties"]["StackRegion"])
-        cluster_name = "AWS-BigDataBlog-Knox-" + event["ResourceProperties"]["StackName"]
+        cluster_name = "EMR-" + event["ResourceProperties"]["StackName"]
         cluster_parameters = {
             'Name': cluster_name,
             'ReleaseLabel': emrReleaseLabel,
@@ -51,10 +51,11 @@ def create(event, context):
                 "Ec2KeyName": event["ResourceProperties"]["KeyName"],
                 "KeepJobFlowAliveWhenNoSteps": True,
                 "TerminationProtected": False,
-                "Ec2SubnetId": event["ResourceProperties"]["subnetID"],
-                "EmrManagedMasterSecurityGroup": event["ResourceProperties"]["masterSG"],
-                "EmrManagedSlaveSecurityGroup": event["ResourceProperties"]["slaveSG"],
-                "ServiceAccessSecurityGroup": event["ResourceProperties"]["serviceSG"]
+                "Ec2SubnetId": event["ResourceProperties"]["subnetID"]
+                # ,
+                # "EmrManagedMasterSecurityGroup": event["ResourceProperties"]["masterSG"],
+                # "EmrManagedSlaveSecurityGroup": event["ResourceProperties"]["slaveSG"],
+                # "ServiceAccessSecurityGroup": event["ResourceProperties"]["serviceSG"]
             },
             'BootstrapActions': [
                 # {

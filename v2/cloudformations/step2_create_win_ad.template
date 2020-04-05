@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: CloudFormation template for launching and configuring an AD Domain controller
-  with a cross-realm trust. Name=c6398801-5e29-461c-a624-c96a45ae033c
+  with a cross-realm trust
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:

@@ -5,29 +5,29 @@ from pyspark import SQLContext
 sqlContext = SQLContext(sparkContext=sc)
 
 # Join orders and products to get the sales rollup
-productsFile = sqlContext.read.parquet("s3://data-lake-us-east-1-762525141659/rawdata/products/")
+productsFile = sqlContext.read.parquet("<s3 path>")
 
 productsFile.registerTempTable("products")
 
-productsFile.write.mode("overwrite").format("parquet").option("path", "s3://aws-datalake-security-data-vbhamidi-us-east-1/staging/products/").saveAsTable("staging.products")
+productsFile.write.mode("overwrite").format("parquet").option("path", "<s3 path>").saveAsTable("staging.products")
 
 # Load orders data from S3 into Datafram
-ordersFile = sqlContext.read.parquet("s3://data-lake-us-east-1-762525141659/rawdata/orders/")
+ordersFile = sqlContext.read.parquet("<s3 path>")
 
 ordersFile.registerTempTable("orders")
 
 #ordersFile.write.mode("overwrite").saveAsTable("retail.orders")
 
-ordersFile.write.mode("overwrite").format("parquet").option("path", "s3://aws-datalake-security-data-vbhamidi-us-east-1/staging/orders/").saveAsTable("staging.orders")
+ordersFile.write.mode("overwrite").format("parquet").option("path", "<s3 path>").saveAsTable("staging.orders")
 
 # Load orders data from S3 into Datafram
-customersFile = sqlContext.read.parquet("s3://data-lake-us-east-1-762525141659/rawdata/customers/")
+customersFile = sqlContext.read.parquet("<s3 path>")
 
 customersFile.registerTempTable("customers")
 
 #ordersFile.write.mode("overwrite").saveAsTable("retail.orders")
 
-customersFile.write.mode("overwrite").format("parquet").option("path", "s3://aws-datalake-security-data-vbhamidi-us-east-1/staging/customers/").saveAsTable("staging.customers")
+customersFile.write.mode("overwrite").format("parquet").option("path", "<s3 path>").saveAsTable("staging.customers")
 
 # Join orders and products to get the sales rollup
 sales_breakup_sql = sqlContext.sql("SELECT sum(orders.price) total_sales, products.sku, products.product_category "
@@ -37,4 +37,4 @@ sales_breakup_sql = sqlContext.sql("SELECT sum(orders.price) total_sales, produc
 sales_breakup_sql.show(n=2)
 
 # Write output back to s3 under processed
-sales_breakup_sql.write.mode('overwrite').format("parquet").option("path", "s3://aws-datalake-security-data-vbhamidi-us-east-1/processed/orders/").saveAsTable("processed.sales")
+sales_breakup_sql.write.mode('overwrite').format("parquet").option("path", "<s3 path>").saveAsTable("processed.sales")

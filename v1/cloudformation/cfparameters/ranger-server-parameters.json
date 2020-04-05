@@ -1,0 +1,14 @@
+{
+  "StackName" : "RangerServer",
+  "Parameters": {
+    "VPC": "vpc-09b8ac6b740641428",
+    "Subnet": "subnet-03913e867676d4d39",
+    "KeyName":"key-account4",
+    "myDirectoryIPAddress":"10.0.1.121",
+    "myDirectoryBaseDN":"dc=awsknox,dc=com",
+    "myDirectoryBindUser": "binduser@awsknox.com",
+    "myDirectoryBindPassword": "Bind@User123",
+    "rangerVersion":"1.0",
+    "s3artifactsRepoHttp":"https://s3.amazonaws.com/aws-bigdata-blog/artifacts/aws-blog-emr-ranger"
+  }
+}

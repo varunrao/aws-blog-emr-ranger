@@ -1,0 +1,20 @@
+{
+  "StackName": "EMR6",
+  "Parameters": {
+    "CoreInstanceCount": "3",
+    "CoreInstanceType": "m3.2xlarge",
+    "EMRClusterName": "SecurityPOCCluster",
+    "EMRLogDir": "s3://emr-logs-varun-us-east-1/",
+    "emrReleaseLabel": "emr-5.16.0",
+    "KeyName": "gcp-css",
+    "LDAPServerIP": "10.0.3.99",
+    "MasterInstanceType": "m3.2xlarge",
+    "myDirectoryBindPassword": "Bind@User123",
+    "myDirectoryBindUser": "binduser@corp.emr.local",
+    "RangerHostname": "10.0.2.67",
+    "rangerVersion": "0.7",
+    "s3artifactsRepo": "s3://aws-bigdata-blog/artifacts/aws-blog-emr-ranger",
+    "Subnet": "subnet-c4a0428d",
+    "VPC": "vpc-b977ebde"
+  }
+}

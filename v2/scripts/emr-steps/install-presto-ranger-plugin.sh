@@ -26,7 +26,7 @@ else
 fi
 
 ranger_s3bucket=$s3bucket/ranger/ranger-$ranger_download_version
-ranger_presto_plugin=ranger-$ranger_download_version-presto-plugin
+ranger_presto_plugin=ranger-$ranger_download_version-prestodb-plugin
 
 #Setup
 sudo rm -rf $installpath/$ranger_presto_plugin
@@ -66,16 +66,11 @@ sudo sed -i "s|XAAUDIT.SOLR.SOLR_URL=.*|XAAUDIT.SOLR.SOLR_URL=http://$ranger_fqd
 sudo sed -i "s|XAAUDIT.SOLR.ENABLE=.*|XAAUDIT.SOLR.ENABLE=true|g" install.properties
 sudo sed -i "s|XAAUDIT.SOLR.IS_ENABLED=.*|XAAUDIT.SOLR.IS_ENABLED=true|g" install.properties
 echo "XAAUDIT.SUMMARY.ENABLE=true" | sudo tee -a install.properties
-#sudo sed -i "s|XAAUDIT.DB.HOSTNAME=.*|XAAUDIT.DB.HOSTNAME=localhost|g" install.properties
-#sudo sed -i "s|XAAUDIT.DB.DATABASE_NAME=.*|XAAUDIT.DB.DATABASE_NAME=ranger_audit|g" install.properties
-#sudo sed -i "s|XAAUDIT.DB.USER_NAME=.*|XAAUDIT.DB.USER_NAME=rangerlogger|g" install.properties
-#sudo sed -i "s|XAAUDIT.DB.PASSWORD=.*|XAAUDIT.DB.PASSWORD=rangerlogger|g" install.properties
-#sudo sed -i "s|XAAUDIT.DB.IS_ENABLED=.*|XAAUDIT.DB.IS_ENABLED=true|g" install.properties
-#sudo sed -i "s|XAAUDIT.DB.HOSTNAME=.*|XAAUDIT.DB.HOSTNAME=$ranger_fqdn|g" install.properties
+
 sudo mkdir -p /usr/presto/etc/
 sudo ln -s /etc/presto/conf/ /usr/presto/conf/ || true
 sudo ln -s /usr/lib/presto/ /usr/presto/ || true
-sudo -E bash enable-presto-plugin.sh
+sudo -E bash enable-prestodb-plugin.sh
 
 sudo cp /usr/presto/etc/access-control.properties /usr/lib/presto/etc/
 sudo cp -r /usr/presto/plugin/ranger /usr/lib/presto/plugin/
@@ -86,8 +81,13 @@ sudo aws s3 cp $ranger_s3bucket/jdom-1.1.3.jar /usr/lib/presto/plugin/ranger/ --
 sudo aws s3 cp $ranger_s3bucket/rome-0.9.jar /usr/lib/presto/plugin/ranger/ --region us-east-1
 
 sudo ln -s /usr/lib/presto/plugin/ranger/ranger-presto-plugin-impl/conf /usr/lib/presto/plugin/ranger/ || true
+
 ## Added for hive integration
-sudo sed -i "s|ranger_host|$ranger_fqdn|g" /usr/lib/presto/plugin/ranger/conf/ranger-hive-*.xml
+#sudo sed -i "s|ranger_host|$ranger_fqdn|g" /usr/lib/presto/plugin/ranger/conf/ranger-hive-*.xml
+
+sudo cp /etc/hive/conf.dist/ranger-hive-security.xml /usr/lib/presto/plugin/ranger/conf/ || true
+sudo cp /etc/hive/conf.dist/ranger-hive-audit.xml /usr/lib/presto/plugin/ranger/conf/ || true
+
 sudo puppet apply -e 'service { "presto-server": ensure => false, }'
 sudo puppet apply -e 'service { "presto-server": ensure => true, }'
 

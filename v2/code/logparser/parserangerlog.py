@@ -4,7 +4,7 @@ from io import StringIO
 
 import boto3
 
-iamAccountId = "453530013122"
+iamAccountId = ""
 iam_client = boto3.client('iam')
 
 

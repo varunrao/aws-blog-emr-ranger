@@ -1,0 +1,27 @@
+{
+  "StackName" : "EMRSecurityWithRangerV1",
+  "Parameters": {
+    "VPC": "vpc-0ac3f0da64d729933",
+    "VPCCidrBlock": "10.0.0.0/16",
+    "DefaultSubnet": "subnet-0aa1e13ec79bfb7c0",
+    "Subnet1SimpleAD": "subnet-0aa1e13ec79bfb7c0",
+    "Subnet2SimpleAD": "subnet-02ee1497a5e25797a",
+    "DomainName": "corp.emr.local",
+    "DomainShortName":"EmrSimpleAD",
+    "KeyName": "vbhamidi5-us-east-1",
+    "CoreInstanceCount": "3",
+    "RangerInstanceType": "m4.xlarge",
+    "CoreInstanceType": "m4.2xlarge",
+    "EMRClusterName":"SecurityPOCCluster",
+    "EMRLogDir": "s3://secure-datalake-us-east-1-logs/",
+    "MasterInstanceType":"m4.2xlarge",
+    "myDirectoryBaseDN":"dc=corp,dc=emr,dc=local",
+    "myDirectoryBindUser": "binduser@corp.emr.local",
+    "myDirectoryAdminPassword": "Admin@123",
+    "myDirectoryBindPassword": "Admin@123",
+    "myDirectoryDefaultUserPassword": "Admin@123",
+    "rangerVersion": "2.0",
+    "emrReleaseLabel": "emr-5.29.0",
+    "InstallPrestoRangerPlugin": "true"
+  }
+}

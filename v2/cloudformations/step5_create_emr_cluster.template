@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: This template creates a security configuration and launches a kerberized
-  Amazon EMR cluster. Name=c6398801-5e29-461c-a624-c96a45ae033c
+  Amazon EMR cluster
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -267,58 +267,58 @@ Conditions:
   EnableKerberos:
     !Equals [true, !Ref EnableKerberos]
 Resources:
-  EMRMasterSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    DependsOn: ServiceAccessSecurityGroup
-    Properties:
-      GroupDescription: CloudFormationGroup
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: '-1'
-          CidrIp: 10.0.0.0/16
-      Tags:
-        - Key: Name
-          Value: AWSEMREMRMasterSecurityGroup
-  ClusterSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    DependsOn: EMRMasterSecurityGroup
-    Properties:
-      GroupDescription: CloudFormationGroup
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: '-1'
-          CidrIp: 10.0.0.0/16
-      Tags:
-        - Key: Name
-          Value: AWSEMRSecurityGroup
-
-  ServiceAccessSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: CloudFormationGroup
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: '-1'
-          CidrIp: 10.0.0.0/16
-      Tags:
-        - Key: Name
-          Value: AWSEMREMRServiceAccessSecurityGroup
-  InboundRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      IpProtocol: tcp
-      FromPort: '22'
-      ToPort: '22'
-      CidrIp: !Ref 'AllowedCIDR'
-      GroupId: !Ref 'EMRMasterSecurityGroup'
-  InboundRknoxRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      IpProtocol: tcp
-      FromPort: '8449'
-      ToPort: '8449'
-      CidrIp: !Ref 'AllowedCIDR'
-      GroupId: !Ref 'EMRMasterSecurityGroup'
+#  EMRMasterSecurityGroup:
+#    Type: AWS::EC2::SecurityGroup
+#    DependsOn: ServiceAccessSecurityGroup
+#    Properties:
+#      GroupDescription: CloudFormationGroup
+#      VpcId: !Ref VPC
+#      SecurityGroupIngress:
+#        - IpProtocol: '-1'
+#          CidrIp: 10.0.0.0/16
+#      Tags:
+#        - Key: Name
+#          Value: AWSEMREMRMasterSecurityGroup
+#  ClusterSecurityGroup:
+#    Type: AWS::EC2::SecurityGroup
+#    DependsOn: EMRMasterSecurityGroup
+#    Properties:
+#      GroupDescription: CloudFormationGroup
+#      VpcId: !Ref VPC
+#      SecurityGroupIngress:
+#        - IpProtocol: '-1'
+#          CidrIp: 10.0.0.0/16
+#      Tags:
+#        - Key: Name
+#          Value: AWSEMRSecurityGroup
+#
+#  ServiceAccessSecurityGroup:
+#    Type: AWS::EC2::SecurityGroup
+#    Properties:
+#      GroupDescription: CloudFormationGroup
+#      VpcId: !Ref VPC
+#      SecurityGroupIngress:
+#        - IpProtocol: '-1'
+#          CidrIp: 10.0.0.0/16
+#      Tags:
+#        - Key: Name
+#          Value: AWSEMREMRServiceAccessSecurityGroup
+#  InboundRule:
+#    Type: AWS::EC2::SecurityGroupIngress
+#    Properties:
+#      IpProtocol: tcp
+#      FromPort: '22'
+#      ToPort: '22'
+#      CidrIp: !Ref 'AllowedCIDR'
+#      GroupId: !Ref 'EMRMasterSecurityGroup'
+#  InboundRknoxRule:
+#    Type: AWS::EC2::SecurityGroupIngress
+#    Properties:
+#      IpProtocol: tcp
+#      FromPort: '8449'
+#      ToPort: '8449'
+#      CidrIp: !Ref 'AllowedCIDR'
+#      GroupId: !Ref 'EMRMasterSecurityGroup'
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -475,9 +475,9 @@ Resources:
       subnetID: !Ref 'ClusterSubnetID'
       JobFlowRole: !Ref 'EMRInstanceProfile'
       ServiceRole: !Ref 'EmrServiceRole'
-      masterSG: !Ref 'EMRMasterSecurityGroup'
-      slaveSG: !Ref 'ClusterSecurityGroup'
-      serviceSG: !Ref 'ServiceAccessSecurityGroup'
+#      masterSG: !Ref 'EMRMasterSecurityGroup'
+#      slaveSG: !Ref 'ClusterSecurityGroup'
+#      serviceSG: !Ref 'ServiceAccessSecurityGroup'
       S3Bucket: !Ref 'S3Bucket'
       S3Key: !Ref 'S3Key'
       EMRSecurityConfig: !If
