@@ -68,6 +68,7 @@ sudo sed -i "s|XAAUDIT.SOLR.IS_ENABLED=.*|XAAUDIT.SOLR.IS_ENABLED=true|g" instal
 echo "XAAUDIT.SUMMARY.ENABLE=true" | sudo tee -a install.properties
 
 sudo mkdir -p /usr/presto/etc/
+sudo mkdir -p /usr/presto/conf/
 sudo ln -s /etc/presto/conf/ /usr/presto/conf/ || true
 sudo ln -s /usr/lib/presto/ /usr/presto/ || true
 sudo -E bash enable-prestodb-plugin.sh
