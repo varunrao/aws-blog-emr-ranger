@@ -14,7 +14,7 @@ It uses agents to sync policies and users, and plugins that run within the same 
 
 Please open Git Issues if you would like to see updates/other plugin integrations. 
 
-#### <u>Warning</u>: The EMRFS S3 plugin only works when calls are made through EMRFS. By default Hive, Spark and Presto will use EMRFS to make calls to S3. Direct access to S3 outside EMRFS (Boto/cli etc) will NOT be controlled by the Ranger policies.
+#### WARNING: The EMRFS S3 plugin only works when calls are made through EMRFS. By default Hive, Spark and Presto will use EMRFS to make calls to S3. Direct access to S3 outside EMRFS (Boto/cli etc) will NOT be controlled by the Ranger policies.
 
 ### References:
 
