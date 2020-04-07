@@ -5,9 +5,7 @@ Features include centralized security administration,
 fine-grained authorization across many Hadoop components (eg - Hadoop, Hive, HBase, Storm, Knox, Solr, Kafka, and YARN) and central auditing. 
 It uses agents to sync policies and users, and plugins that run within the same process as the Hadoop component, like NameNode and HiveServer2.
 
-### Modules
-
-There are 2 deployment options. 
+### Deployment options: 
 
 | Module | Cloudformation stack | Architecture | Description |
 | ---------------- | --- | --- |-------------------------------------------------------- |

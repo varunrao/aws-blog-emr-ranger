@@ -21,7 +21,8 @@ This is V2 of the blog post with many updates
 
 ## Deployment steps
 - Once stack is up, create AD users and groups and activate them
-- Setup 
+- Before running spark jobs, create HDFS home directory for each user
+- Sample table DDL, SQL and Spark code can be found under [user queries](userqueries)
 
 #### <u>Warning</u>: The EMRFS S3 plugin only works when calls are made through EMRFS. By default Hive, Spark and Presto will use EMRFS. Direct access to S3 outside EMRFS will NOT be controlled by the Ranger policies.
 
