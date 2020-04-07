@@ -24,7 +24,7 @@ This is V2 of the blog post with many updates
 - Before running spark jobs, create HDFS home directory for each user
 - Sample table DDL, SQL and Spark code can be found under [user queries](userqueries)
 
-#### <u>Warning</u>: The EMRFS S3 plugin only works when calls are made through EMRFS. By default Hive, Spark and Presto will use EMRFS. Direct access to S3 outside EMRFS will NOT be controlled by the Ranger policies.
+#### <span style="color:red">Warning</span>: The EMRFS S3 plugin only works when calls are made through EMRFS. By default Hive, Spark and Presto will use EMRFS. Direct access to S3 outside EMRFS will NOT be controlled by the Ranger policies.
 
 ### References:
 
