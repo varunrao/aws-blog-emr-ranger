@@ -110,7 +110,7 @@ def create(event, context):
             'Applications': applist,
             'Steps': [
                 {
-                    "Name": "InstallRangerPlugin",
+                    "Name": "InstallHiveHDFSRangerPlugin",
                     "ActionOnFailure": "CONTINUE",
                     "HadoopJarStep": {
                         "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
@@ -123,37 +123,12 @@ def create(event, context):
                     }
                 },
                 {
-                    "Name": "InstallRangerPolicies",
+                    "Name": "InstallHiveHDFSRangerPolicies",
                     "ActionOnFailure": "CONTINUE",
                     "HadoopJarStep": {
                         "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
                         "Args": [
                             "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-hive-hdfs-ranger-policies.sh",
-                            event["ResourceProperties"]["RangerHostname"],
-                            "s3://" + s3Bucket + "/" + event["ResourceProperties"]["S3Key"] + "/inputdata"
-                        ]
-                    }
-                },
-                {
-                    "Name": "InstallRangerPrestoPlugin",
-                    "ActionOnFailure": "CONTINUE",
-                    "HadoopJarStep": {
-                        "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
-                        "Args": [
-                            "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-presto-ranger-plugin.sh",
-                            event["ResourceProperties"]["RangerHostname"],
-                            event["ResourceProperties"]["RangerVersion"],
-                            "s3://" + s3Bucket + "/" + event["ResourceProperties"]["S3Key"]
-                        ]
-                    }
-                },
-                {
-                    "Name": "InstallRangerPrestoPolicies",
-                    "ActionOnFailure": "CONTINUE",
-                    "HadoopJarStep": {
-                        "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
-                        "Args": [
-                            "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-presto-ranger-policies.sh",
                             event["ResourceProperties"]["RangerHostname"],
                             "s3://" + s3Bucket + "/" + event["ResourceProperties"]["S3Key"] + "/inputdata"
                         ]
@@ -171,26 +146,13 @@ def create(event, context):
                     }
                 },
                 {
-                    "Name": "CreateHiveTables",
+                    "Name": "CreateDefaultHiveTables",
                     "ActionOnFailure": "CONTINUE",
                     "HadoopJarStep": {
                         "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
                         "Args": [
                             "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/createHiveTables.sh",
                             event["ResourceProperties"]["StackRegion"]
-                        ]
-                    }
-                },
-                {
-                    "Name": "InstallRangerSparkPlugin",
-                    "ActionOnFailure": "CONTINUE",
-                    "HadoopJarStep": {
-                        "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
-                        "Args": [
-                            "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-spark-ranger-plugin.sh",
-                            event["ResourceProperties"]["RangerHostname"],
-                            event["ResourceProperties"]["RangerVersion"],
-                            "s3://" + s3Bucket + "/" + event["ResourceProperties"]["S3Key"]
                         ]
                     }
                 },
@@ -215,7 +177,7 @@ def create(event, context):
                 #     }
                 # },
                 {
-                    "Name": "CFN-SIGNAL-STEP",
+                    "Name": "Cloudformation-Signal",
                     "ActionOnFailure": "CONTINUE",
                     "HadoopJarStep": {
                         "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
@@ -255,17 +217,6 @@ def create(event, context):
                         "hive.metastore": "glue"
                     }
                 },
-                # {
-                #     "Classification": "hive-site",
-                #     "Properties": {
-                #         "hive.server2.allow.user.substitution": "true",
-                #         "hive.server2.transport.mode": "http",
-                #         "hive.server2.thrift.http.port": "10001",
-                #         "hive.server2.thrift.http.path": "cliservice",
-                #         "hive.server2.authentication.kerberos.principal": "HTTP/_HOST@EC2.INTERNAL",
-                #         "hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
-                #     }
-                # },
                 {
                     "Classification": "livy-conf",
                     "Properties": {
@@ -345,7 +296,8 @@ def create(event, context):
                                         "nt_domain": event["ResourceProperties"]["DomainDNSName"],
                                         "search_bind_authentication": "true",
                                         "trace_level": "0",
-                                        "sync_groups_on_login": "true"
+                                        "sync_groups_on_login": "true",
+                                        "create_users_on_login": "true"
                                     },
                                     "Configurations": [
                                         # {
@@ -481,6 +433,47 @@ def create(event, context):
                     "hadoop.proxyuser.hive.hosts": "*",
                     "hadoop.proxyuser.hive.groups": "*",
                     "hadoop.proxyuser.hue_hive.groups": "*"
+                }
+            })
+
+        if event["ResourceProperties"]["InstallSparkPlugin"] == "true":
+            cluster_parameters['Steps'].append({
+                "Name": "InstallRangerSparkPlugin",
+                "ActionOnFailure": "CONTINUE",
+                "HadoopJarStep": {
+                    "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
+                    "Args": [
+                        "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-spark-ranger-plugin.sh",
+                        event["ResourceProperties"]["RangerHostname"],
+                        event["ResourceProperties"]["RangerVersion"],
+                        "s3://" + s3Bucket + "/" + event["ResourceProperties"]["S3Key"]
+                    ]
+                }
+            })
+        if event["ResourceProperties"]["InstallPrestoPlugin"] == "true":
+            cluster_parameters['Steps'].append({
+                "Name": "InstallRangerPrestoPlugin",
+                "ActionOnFailure": "CONTINUE",
+                "HadoopJarStep": {
+                    "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
+                    "Args": [
+                        "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-presto-ranger-plugin.sh",
+                        event["ResourceProperties"]["RangerHostname"],
+                        event["ResourceProperties"]["RangerVersion"],
+                        "s3://" + s3Bucket + "/" + event["ResourceProperties"]["S3Key"]
+                    ]
+                }
+            })
+            cluster_parameters['Steps'].append({
+                "Name": "InstallRangerPrestoPolicies",
+                "ActionOnFailure": "CONTINUE",
+                "HadoopJarStep": {
+                    "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
+                    "Args": [
+                        "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-presto-ranger-policies.sh",
+                        event["ResourceProperties"]["RangerHostname"],
+                        "s3://" + s3Bucket + "/" + event["ResourceProperties"]["S3Key"] + "/inputdata"
+                    ]
                 }
             })
         cluster_id = client.run_job_flow(**cluster_parameters)

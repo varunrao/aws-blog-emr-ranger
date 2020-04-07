@@ -52,3 +52,6 @@ sudo sed -i "s|service_name|awss3dev|g" install/conf/ranger-awss3-security.xml
 sudo cp install/conf/* /usr/share/aws/emr/emrfs/conf/
 sudo chmod -R 777 /usr/share/aws/emr/emrfs/conf/
 sudo chmod -R 777 /usr/share/aws/emr/emrfs/lib/
+sudo mkdir -p /var/log/emr-awss3/
+sudo touch /var/log/emr-awss3/awss3.log || true
+sudo chmod 777 /var/log/emr-awss3/awss3.log || true

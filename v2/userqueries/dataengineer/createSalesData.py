@@ -5,7 +5,7 @@ from pyspark import SQLContext
 sqlContext = SQLContext(sparkContext=sc)
 
 # Join orders and products to get the sales rollup
-productsFile = sqlContext.read.parquet("<s3 path>")
+productsFile = sqlContext.read.parquet("s3://aws-bigdata-blog/artifacts/aws-blog-emr-ranger-v2/data/staging/products/")
 
 productsFile.registerTempTable("products")
 

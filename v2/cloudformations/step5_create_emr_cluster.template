@@ -201,6 +201,16 @@ Parameters:
     Default: true
     Type: String
     AllowedValues: [true, false]
+  InstallSparkPlugin:
+    Description: Install Ranger Spark plugin
+    Default: true
+    Type: String
+    AllowedValues: [true, false]
+  InstallPrestoPlugin:
+    Description: Install Ranger PrestoDB plugin
+    Default: true
+    Type: String
+    AllowedValues: [true, false]
   LDAPHostPrivateIP:
     Description: Ldap Host Private IP address
     Type: String
@@ -376,14 +386,14 @@ Resources:
     Condition: EnableKerberos
     Properties:
       SecurityConfiguration:
-        EncryptionConfiguration:
-          EnableAtRestEncryption: false
-          EnableInTransitEncryption: true
-          InTransitEncryptionConfiguration:
-            TLSCertificateConfiguration:
-              CertificateProviderType: PEM
-              S3Object: !Join ['', ["s3://", !Ref S3Bucket, "/", !Ref S3Key,
-                                    '/emr-tls/emr-certs.zip']]
+#        EncryptionConfiguration:
+#          EnableAtRestEncryption: false
+#          EnableInTransitEncryption: true
+#          InTransitEncryptionConfiguration:
+#            TLSCertificateConfiguration:
+#              CertificateProviderType: PEM
+#              S3Object: !Join ['', ["s3://", !Ref S3Bucket, "/", !Ref S3Key,
+#                                    '/emr-tls/emr-certs.zip']]
         AuthenticationConfiguration:
           KerberosConfiguration:
             Provider: ClusterDedicatedKdc
@@ -394,53 +404,53 @@ Resources:
                 Domain: !Ref 'DomainDNSName'
                 AdminServer: !Ref 'DomainDNSName'
                 KdcServer: !Ref 'DomainDNSName'
-        AuthorizationConfiguration:
-          EmrFsConfiguration:
-            RoleMappings:
-            - Role: !Join
-                - ':'
-                - - arn
-                  - aws
-                  - iam
-                  - ''
-                  - !Ref 'AWS::AccountId'
-                  - "role/DeveloperRole"
-              IdentifierType: Group
-              Identifiers:
-                - developer
-            - Role: !Join
-                - ':'
-                - - arn
-                  - aws
-                  - iam
-                  - ''
-                  - !Ref 'AWS::AccountId'
-                  - "role/AnalystRole"
-              IdentifierType: Group
-              Identifiers:
-                - analyst
-            - Role: !Join
-                - ':'
-                - - arn
-                  - aws
-                  - iam
-                  - ''
-                  - !Ref 'AWS::AccountId'
-                  - "role/Customer_CompanyARole"
-              IdentifierType: Group
-              Identifiers:
-                - customer_companyA
-            - Role: !Join
-                - ':'
-                - - arn
-                  - aws
-                  - iam
-                  - ''
-                  - !Ref 'AWS::AccountId'
-                  - "role/Businessuser_Product1Role"
-              IdentifierType: Group
-              Identifiers:
-                - businessuser_product1
+#        AuthorizationConfiguration:
+#          EmrFsConfiguration:
+#            RoleMappings:
+#            - Role: !Join
+#                - ':'
+#                - - arn
+#                  - aws
+#                  - iam
+#                  - ''
+#                  - !Ref 'AWS::AccountId'
+#                  - "role/DeveloperRole"
+#              IdentifierType: Group
+#              Identifiers:
+#                - developer
+#            - Role: !Join
+#                - ':'
+#                - - arn
+#                  - aws
+#                  - iam
+#                  - ''
+#                  - !Ref 'AWS::AccountId'
+#                  - "role/AnalystRole"
+#              IdentifierType: Group
+#              Identifiers:
+#                - analyst
+#            - Role: !Join
+#                - ':'
+#                - - arn
+#                  - aws
+#                  - iam
+#                  - ''
+#                  - !Ref 'AWS::AccountId'
+#                  - "role/Customer_CompanyARole"
+#              IdentifierType: Group
+#              Identifiers:
+#                - customer_companyA
+#            - Role: !Join
+#                - ':'
+#                - - arn
+#                  - aws
+#                  - iam
+#                  - ''
+#                  - !Ref 'AWS::AccountId'
+#                  - "role/Businessuser_Product1Role"
+#              IdentifierType: Group
+#              Identifiers:
+#                - businessuser_product1
 
   #    AuthenticationConfiguration:
   #      KerberosConfiguration:
@@ -509,7 +519,9 @@ Resources:
       RangerHostname: !Ref RangerHostname
       RangerVersion: !Ref rangerVersion
       EnablePrestoKerberos: !Ref EnablePrestoKerberos
+      InstallPrestoPlugin: !Ref InstallPrestoPlugin
       InstallS3Plugin: !Ref InstallS3Plugin
+      InstallSparkPlugin: !Ref InstallSparkPlugin
   emrCreateWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
     Properties: {}

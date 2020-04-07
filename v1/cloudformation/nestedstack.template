@@ -44,7 +44,7 @@ Parameters:
     Description: Instance Type of the core node
     Type: String
   EMRClusterName:
-    Default: SecurityPOCCluster
+    Default: EMR-EMRSecurityWithRangerV1
     Description: Cluster name for the EMR
     Type: String
   EMRLogDir:
@@ -52,7 +52,7 @@ Parameters:
     Type: String
     AllowedPattern: ^s3://.*
   MasterInstanceType:
-    Default: m3.5xlarge
+    Default: m4.2xlarge
     Description: Instance Type of the master node
     Type: String
   myDirectoryBaseDN:

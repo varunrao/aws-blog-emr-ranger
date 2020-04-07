@@ -149,7 +149,17 @@ Parameters:
     Type: String
     AllowedValues: [true, false]
   InstallS3Plugin:
-    Description: Update to enable Kerberos for Presto
+    Description: Install Ranger EMRFS S3 Plugin
+    Default: true
+    Type: String
+    AllowedValues: [true, false]
+  InstallSparkPlugin:
+    Description: Install Ranger Spark plugin
+    Default: true
+    Type: String
+    AllowedValues: [true, false]
+  InstallPrestoPlugin:
+    Description: Install Ranger PrestoDB plugin
     Default: true
     Type: String
     AllowedValues: [true, false]
@@ -400,6 +410,8 @@ Resources:
         rangerVersion: !Ref rangerVersion
         RangerHostname: !GetAtt 'STEP4RangerServer.Outputs.IPAddress'
         InstallS3Plugin: !Ref InstallS3Plugin
+        InstallSparkPlugin: !Ref InstallSparkPlugin
+        InstallPrestoPlugin: !Ref InstallPrestoPlugin
 Outputs:
   LDAPHostPrivateIP:
     Value: !GetAtt [STEP2WinAD, Outputs.LDAPHostPrivateIP]

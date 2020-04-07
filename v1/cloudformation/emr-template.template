@@ -22,7 +22,7 @@ Parameters:
     Description: Instance Type of the core node
     Type: String
   EMRClusterName:
-    Default: SecurityPOCCluster
+    Default: EMR-EMRSecurityWithRangerV1
     Description: Cluster name for the EMR
     Type: String
   EMRLogDir:

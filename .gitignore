@@ -10,3 +10,4 @@ cr_zip_upload_to_s3.sh
 /v2/cloudformations/cfparameters
 /v2/userqueries
 NOTES
+/v1/cloudformation/cfparameters/
