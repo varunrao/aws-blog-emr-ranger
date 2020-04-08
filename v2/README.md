@@ -1,7 +1,7 @@
 # Authorization and Auditing on Amazon EMR Using Apache Ranger - V2
 The repo contains code tied to [AWS Big Data Blog](https://aws.amazon.com/blogs/big-data/implementing-authorization-and-auditing-using-apache-ranger-on-amazon-emr/) on Implementing Authorization and Auditing on Amazon EMR Using Apache Ranger
 
-This is V2 of the blog post with many updates
+This is V2 of the blog post with following updates
 
 - Apache Ranger 2.0
 - Windows AD server on EC2
@@ -11,8 +11,10 @@ This is V2 of the blog post with many updates
      * HDFS
      * Apache Hive
      * Apache PrestoDB plugin - optional
-     * EMRFS S3 plugin (beta) - optional
-     * SparkSQL Plugin (beta) - optional
+     * EMRFS S3 plugin (**beta**) - optional
+     * SparkSQL Plugin (**beta**) - optional
+
+> Plugins marked as **beta** has not been tested in production
 
 | Module | Cloudformation stack | Architecture | Description |
 | ---------------- | --- | --- |-------------------------------------------------------- |
@@ -24,7 +26,7 @@ This is V2 of the blog post with many updates
 - Before running spark jobs, create HDFS home directory for each user
 - Sample table DDL, SQL and Spark code can be found under [user queries](userqueries)
 
-#### WARNING: The EMRFS S3 plugin only works when calls are made through EMRFS. By default Hive, Spark and Presto will use EMRFS. Direct access to S3 outside EMRFS will NOT be controlled by the Ranger policies.
+> WARNING: The EMRFS S3 plugin only works when calls are made through EMRFS. By default Hive, Spark and Presto will use EMRFS to make calls to S3. Direct access to S3 outside EMRFS (Boto/cli etc) will NOT be controlled by the Ranger policies.
 
 ### References:
 

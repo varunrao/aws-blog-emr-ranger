@@ -7,6 +7,11 @@ It uses agents to sync policies and users, and plugins that run within the same 
 
 The repo contains code tied to [AWS Big Data Blog](https://aws.amazon.com/blogs/big-data/implementing-authorization-and-auditing-using-apache-ranger-on-amazon-emr/)
 
+> **Development Status** the code has gone through unit and functional test against a **few recent versions** of Amazon EMR. 
+> It is likely that it may not work with **all** EMR versions.
+> Plugins under (beta) have **not** been tested in production
+>> Please submit Pull Request or to create an [Issue](https://github.com/varunrao/aws-blog-emr-ranger/issues/new)
+>
 ### Deployment options: 
 
 | Module | Cloudformation stack | Architecture | Description |
@@ -16,7 +21,7 @@ The repo contains code tied to [AWS Big Data Blog](https://aws.amazon.com/blogs/
 
 Please open Git Issues if you would like to see updates/other plugin integrations. 
 
-#### WARNING: The EMRFS S3 plugin only works when calls are made through EMRFS. By default Hive, Spark and Presto will use EMRFS to make calls to S3. Direct access to S3 outside EMRFS (Boto/cli etc) will NOT be controlled by the Ranger policies.
+> WARNING: The EMRFS S3 plugin only works when calls are made through EMRFS. By default Hive, Spark and Presto will use EMRFS to make calls to S3. Direct access to S3 outside EMRFS (Boto/cli etc) will NOT be controlled by the Ranger policies.
 
 ### References:
 
