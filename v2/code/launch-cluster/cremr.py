@@ -206,12 +206,6 @@ def create(event, context):
                     }
                 },
                 {
-                    "Classification": "spark-defaults",
-                    "Properties": {
-                        "spark.sql.extensions": "org.apache.ranger.authorization.spark.authorizer.RangerSparkSQLExtension"
-                    }
-                },
-                {
                     "Classification": "presto-connector-hive",
                     "Properties": {
                         "hive.metastore": "glue"
@@ -448,6 +442,12 @@ def create(event, context):
                         event["ResourceProperties"]["RangerVersion"],
                         "s3://" + s3Bucket + "/" + event["ResourceProperties"]["S3Key"]
                     ]
+                }
+            })
+            cluster_parameters['Configurations'].append({
+                "Classification": "spark-defaults",
+                "Properties": {
+                    "spark.sql.extensions": "org.apache.ranger.authorization.spark.authorizer.RangerSparkSQLExtension"
                 }
             })
         if event["ResourceProperties"]["InstallPrestoPlugin"] == "true":
