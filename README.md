@@ -9,7 +9,7 @@ The repo contains code tied to [AWS Big Data Blog](https://aws.amazon.com/blogs/
 
 > **Development Status** the code has gone through unit and functional test against a **few recent versions** of Amazon EMR. 
 > It is likely that it may not work with **all** EMR versions.
-> Plugins under (beta) have **not** been tested in production
+> Plugins marked as **beta** has not been tested in production.
 >> Please submit Pull Request or to create an [Issue](https://github.com/varunrao/aws-blog-emr-ranger/issues/new)
 >
 ### Deployment options: 
