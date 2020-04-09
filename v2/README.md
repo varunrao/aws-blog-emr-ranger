@@ -30,6 +30,9 @@ This is V2 of the blog post with following updates
 
 > WARNING: The EMRFS S3 plugin only works when calls are made through EMRFS. By default Hive, Spark and Presto will use EMRFS to make calls to S3. Direct access to S3 outside EMRFS (Boto/cli etc) will NOT be controlled by the Ranger policies.
 
+### EMRFS S3 Plugin definition
+![](../images/s3-policy.png)
+
 ### References:
 
  - Amazon EMR: https://aws.amazon.com/emr/
