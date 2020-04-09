@@ -10,7 +10,9 @@ This is V2 of the blog post with following updates
    * Ranger Plugins
      * HDFS
      * Apache Hive
-     * Apache PrestoDB plugin - optional (uses hive table/column definitions when the using 'hive' catalog)
+     * Apache PrestoDB plugin - optional 
+       * Uses hive table/column definitions when the using 'hive' catalog)
+       * NOTE: It does not support column masking/row filtering yet (we are exploring it)
      * EMRFS S3 plugin (**beta**) - optional
      * SparkSQL Plugin (**beta**) - optional
 
