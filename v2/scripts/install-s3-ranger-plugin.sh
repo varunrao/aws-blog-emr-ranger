@@ -55,3 +55,6 @@ sudo chmod -R 777 /usr/share/aws/emr/emrfs/lib/
 sudo mkdir -p /var/log/emr-awss3/
 sudo touch /var/log/emr-awss3/awss3.log || true
 sudo chmod 777 /var/log/emr-awss3/awss3.log || true
+sudo chmod 444 /var/aws/emr/userData.json || true
+sudo mkdir -p /etc/ranger/awss3/policycache/ || true
+sudo chmod -R 777 /etc/ranger/awss3/ || true
