@@ -76,6 +76,7 @@ sudo sed -i "s|XAAUDIT.SOLR.ENABLE=.*|XAAUDIT.SOLR.ENABLE=false|g" install.prope
 #sudo sed -i "s|XAAUDIT.DB.PASSWORD=.*|XAAUDIT.DB.PASSWORD=rangerlogger|g" install.properties
 
 sudo -E bash enable-hdfs-plugin.sh
+sudo chmod 444 /var/aws/emr/userData.json || true
 # new copy cammand - 01/26/2020
 sudo cp -r /etc/hadoop/ranger-*.xml /etc/hadoop/conf/
 #Update Ranger URL in Hive Conf
