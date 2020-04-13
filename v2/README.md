@@ -22,6 +22,9 @@ This is V2 of the blog post with following updates
 | ---------------- | --- | --- |-------------------------------------------------------- |
 | [AD setup with Kerberos](v2) | [![Foo](../images/launch_stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=EMRSecurityWithRangerV2&templateURL=https://aws-bigdata-blog.s3.amazonaws.com/artifacts/aws-blog-emr-ranger-v2/cloudformations/rootcf.template) | ![](../images/emr-ranger-v2.png) | Deployment using [Microsoft AD server](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview), Hive, HDFS, Spark (beta), EMRFS S3 (beta) and Presto Plugin |
 
+## Cloudformation stack output
+
+![](../images/emr-ranger-v2-cfn.png)
 
 ## Deployment steps
 - Once stack is up, create AD users and groups and activate them

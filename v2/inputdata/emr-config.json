@@ -1,15 +1,31 @@
 {
-  "ClusterId": "j-2TFV75KFCN7Q9",
+  "ClusterId": "xxxx",
   "InstanceGroups": [
     {
-      "InstanceGroupId": "ig-2PW3J22XJ383J",
+      "InstanceGroupId": "xxx",
       "Configurations": [
         {
-          "Classification": "emrfs-site",
+          "Classification": "livy-conf",
           "Properties": {
-            "s3.authorization.enabled": "false"
+            "livy.superusers": "knox,hue,livy",
+            "livy.impersonation.enabled": "true",
+            "livy.repl.enable-hive-context": "true"
           },
           "Configurations": []
-        }]
+        },
+        {
+          "Classification": "core-site",
+          "Properties": {
+            "hadoop.proxyuser.knox.groups": "*",
+            "hadoop.proxyuser.knox.hosts": "*",
+            "hadoop.proxyuser.livy.groups": "*",
+            "hadoop.proxyuser.livy.hosts": "*",
+            "hadoop.proxyuser.hive.hosts": "*",
+            "hadoop.proxyuser.hive.groups": "*",
+            "hadoop.proxyuser.hue_hive.groups": "*",
+
+          }
+        }
+      ]
     }]
 }

@@ -14,6 +14,10 @@ This is V1 of the blog post with the following basic setup.
 | ---------------- | --- | --- |-------------------------------------------------------- |
 | [Basic setup with LDAP](v1) | [![Foo](../images/launch_stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=EMRSecurityWithRangerV1&templateURL=https://s3.amazonaws.com/aws-bigdata-blog/artifacts/aws-blog-emr-ranger/cloudformation/nestedstack.template) | ![](../images/simple-ad-setup.png) | Basic Deployment using [AWS Simple AD](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/directory_simple_ad.html), Hive and HDFS plugins and optional Presto Plugin|
 
+## Cloudformation stack output
+
+![](../images/emr-ranger-v1-cfn.png)
+
 ## Contents
 
 This contains the following sub folders:
