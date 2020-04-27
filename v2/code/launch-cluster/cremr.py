@@ -407,6 +407,14 @@ def create(event, context):
 
                 }
             })
+            cluster_parameters['Configurations'].append({
+                "Classification": "emrfs-site",
+                "Properties": {
+                    "s3.authorization.enabled": "true",
+                    "s3.authorizer": "org.apache.ranger.authorization.awss3.authorizer.RangerAuthorizer",
+                    "s3.authorization.skip.users": "hadoop"
+                }
+            })
         else:
             cluster_parameters['Configurations'].append({
                 "Classification": "core-site",

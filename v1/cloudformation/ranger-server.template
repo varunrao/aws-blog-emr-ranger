@@ -205,6 +205,12 @@ Mappings:
       Arch: HVM64
     cc2.8xlarge:
       Arch: HVM64
+    r5.xlarge:
+      Arch: HVM64
+    r5.2xlarge:
+      Arch: HVM64
+    r5.4xlarge:
+      Arch: HVM64
   AWSRegionArch2AMI:
     us-east-1:
       PV64: ami-0023040df18933030
