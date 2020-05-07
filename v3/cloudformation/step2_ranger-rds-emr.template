@@ -1,0 +1,228 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  VPCID:
+    Description: Select the Virtual Private Cloud (VPC) that was created
+    Type: AWS::EC2::VPC::Id
+  PrivateSubnet1AID:
+    Description: ID of an existing subnet for the domain controller
+    Type: AWS::EC2::Subnet::Id
+  PrivateSubnet2AID:
+    Description: ID of an existing subnet for the domain controller
+    Type: AWS::EC2::Subnet::Id
+  NumberOfAZs:
+    Type: String
+    AllowedValues: ["2", "3"]
+    Default: "3"
+    Description: Number of Availability Zones to use in the VPC. This must match your selections in the list of Availability Zones parameter.
+  DomainAdminUser:
+    AllowedPattern: '[a-zA-Z0-9]*'
+    Default: Admin
+    Description: User name for the account that will be added as Domain Administrator.
+      This is separate from the default "Administrator" account
+    MaxLength: '25'
+    MinLength: '5'
+    Type: String
+  DomainAdminPassword:
+    AllowedPattern: (?=^.{6,255}$)((?=.*\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))^.*
+    Description: Password for the domain admin user. Must be at least 8 characters
+      containing letters, numbers and symbols
+    MaxLength: '32'
+    MinLength: '8'
+    NoEcho: 'true'
+    Type: String
+  myDirectoryIPAddress:
+    Description: IP Address of the AD server
+    Type: String
+  KeyPairName:
+    Description: The name of an existing public/private key pair, which allows you
+      to securely connect to your instance after it launches
+    Type: AWS::EC2::KeyPair::KeyName
+  CoreInstanceCount:
+    Default: '3'
+    Description: Number of core instances
+    Type: Number
+  RangerInstanceType:
+    Default: m4.xlarge
+    Description: Instance Type of the core node
+    Type: String
+  CoreInstanceType:
+    Default: m5.2xlarge
+    Description: Instance Type of the core node
+    Type: String
+  EMRClusterName:
+    Default: EMR-EMRSecurityWithRangerV1
+    Description: Cluster name for the EMR
+    Type: String
+  EMRLogDir:
+    Description: 'Log Dir for the EMR cluster. Eg: s3://xxx'
+    Type: String
+    AllowedPattern: ^s3://.*
+  MasterInstanceType:
+    Default: m4.2xlarge
+    Description: Instance Type of the master node
+    Type: String
+  myDirectoryBindUser:
+    Description: BindUser
+    Type: String
+    Default: binduser@awsemr.com
+  myDirectoryBindPassword:
+    Description: BindPassword MicrosoftAD server
+    Type: String
+    NoEcho: true
+  myDirectoryDefaultUserPassword:
+    Description: Default Password for all users created in the MicrosoftAD server
+    Type: String
+    NoEcho: true
+  rangerVersion:
+    Description: 'RangerVersion. Expected values are : 0.6,0.7,1.0,2.0. NOTE: Use Ranger 0.6 if
+      EMR version is 5.0'
+    AllowedValues:
+      - '0.6'
+      - '0.7'
+      - '1.0'
+      - '2.0'
+    Type: String
+    Default: '2.0'
+  emrReleaseLabel:
+    Description: EMR Version. Pick Ranger 0.6 if EMR version is 5.0 or higher
+    AllowedValues:
+      - emr-5.0.0
+      - emr-5.4.0
+      - emr-5.16.0
+      - emr-5.17.0
+      - emr-5.26.0
+      - emr-5.27.0
+      - emr-5.28.0
+      - emr-5.28.1
+      - emr-5.29.0
+      - emr-6.0.0
+    Type: String
+    Default: emr-5.29.0
+  S3Bucket:
+    Description: S3Bucket where artifacts are stored
+    Type: String
+    Default: aws-bigdata-blog
+  S3Key:
+    Description: S3Key of the Lambda code
+    Type: String
+    Default: artifacts/aws-blog-emr-ranger-v3
+  MySQLDBUserName:
+    Description: ' The RDS MySQL database username'
+    Type: String
+    Default: root
+    AllowedValues:
+      - root
+  MySQLDBPassword:
+    Description: ' The RDS MySQL database password'
+    MaxLength: '41'
+    MinLength: '8'
+    NoEcho: 'true'
+    Type: String
+  InstallPrestoRangerPlugin:
+    Description: Install the Ranger Presto Plugin. NOTE - This needs Ranger 2.0 and has not been tested with all versions
+    Default: false
+    Type: String
+    AllowedValues: [true, false]
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Artifacts repo
+        Parameters:
+          - S3Bucket
+          - S3Key
+      - Label:
+          default: Ranger Information
+        Parameters:
+          - rangerVersion
+          - RangerInstanceType
+      - Label:
+          default: EMR Information
+        Parameters:
+          - emrReleaseLabel
+          - EMRClusterName
+          - EMRLogDir
+          - CoreInstanceType
+          - MasterInstanceType
+          - CoreInstanceCount
+Conditions:
+  3AZDeployment: !Equals [!Ref NumberOfAZs, "3"]
+  2AZDeployment: !Or
+    - !Equals [!Ref NumberOfAZs, "2"]
+    - !Equals [!Ref NumberOfAZs, "3"]
+Mappings:
+  DefaultConfiguration:
+    MachineConfiguration:
+      BastionInstanceType: t2.small
+Resources:
+  RDSDatabase:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Join ['', ['https://s3.amazonaws.com/', !Ref 'S3Bucket', '/', !Ref 'S3Key', '/cloudformation/', 'rds-database.template']]
+      Parameters:
+        Subnet1: !Ref 'PrivateSubnet1AID'
+        Subnet2: !If
+          - 2AZDeployment
+          - !Ref 'PrivateSubnet2AID'
+          - !Ref AWS::NoValue
+        VPC: !Ref 'VPCID'
+        MySQLDBPassword: !Ref MySQLDBPassword
+        MySQLDBUserName: !Ref MySQLDBUserName
+  RangerServer:
+    DependsOn:
+      - RDSDatabase
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Join ['', ['https://s3.amazonaws.com/', !Ref 'S3Bucket', '/', !Ref 'S3Key', '/cloudformation/', 'ranger-server.template']]
+      Parameters:
+        S3Bucket: !Ref 'S3Bucket'
+        S3Key: !Ref 'S3Key'
+        VPC: !Ref 'VPCID'
+        Subnet: !Ref 'PrivateSubnet1AID'
+        DBHostName: !GetAtt 'RDSDatabase.Outputs.RDSInstanceAddress'
+        DBRootPassword: !Ref MySQLDBPassword
+        ADAdminUsername: !Ref 'DomainAdminUser'
+        ADAdminPassword: !Ref 'DomainAdminPassword'
+        myDirectoryIPAddress: !Ref myDirectoryIPAddress
+        myDirectoryBaseDN: "dc=awsemr,dc=com"
+        myDirectoryBindUser: !Ref 'myDirectoryBindUser'
+        myDirectoryBindPassword: !Ref 'myDirectoryBindPassword'
+        rangerVersion: !Ref rangerVersion
+        KeyName: !Ref 'KeyPairName'
+  EMRCluster:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - RangerServer
+    Properties:
+      TemplateURL: !Join ['', ['https://s3.amazonaws.com/', !Ref 'S3Bucket', '/', !Ref 'S3Key', '/cloudformation/', 'emr-template.template']]
+      Parameters:
+        myDirectoryBindUser: !Ref 'myDirectoryBindUser'
+        myDirectoryBindPassword: !Ref 'myDirectoryBindPassword'
+        DBHostName: !GetAtt 'RDSDatabase.Outputs.RDSInstanceAddress'
+        DBRootPassword: !Ref MySQLDBPassword
+        emrReleaseLabel: !Ref 'emrReleaseLabel'
+        rangerVersion: !Ref 'rangerVersion'
+        LDAPServerIP: !Ref myDirectoryIPAddress
+        CoreInstanceCount: !Ref 'CoreInstanceCount'
+        CoreInstanceType: !Ref 'CoreInstanceType'
+        EMRClusterName: !Ref 'EMRClusterName'
+        EMRLogDir: !Ref 'EMRLogDir'
+        MasterInstanceType: !Ref 'MasterInstanceType'
+        RangerHostname: !GetAtt 'RangerServer.Outputs.IPAddress'
+        VPC: !Ref 'VPCID'
+        KeyName: !Ref 'KeyPairName'
+        Subnet: !Ref 'PrivateSubnet1AID'
+        s3artifactsRepo: !Join ['', ['s3://', !Ref 'S3Bucket', '/', !Ref 'S3Key']]
+        InstallPrestoRangerPlugin: !Ref 'InstallPrestoRangerPlugin'
+      TimeoutInMinutes: '60'
+Outputs:
+  RDSInstanceAddress:
+    Description: IP Address of the RDS instance
+    Value: !GetAtt 'RDSDatabase.Outputs.RDSInstanceAddress'
+  RangerServerIP:
+    Value: !GetAtt 'RangerServer.Outputs.IPAddress'
+  HueIPAddress:
+    Value: !GetAtt 'EMRCluster.Outputs.IPAddress'
+  EMRMasterNodeIPAddress:
+    Description: IP address of EMR cluster MasterNode
+    Value: !GetAtt 'EMRCluster.Outputs.IPAddress'
