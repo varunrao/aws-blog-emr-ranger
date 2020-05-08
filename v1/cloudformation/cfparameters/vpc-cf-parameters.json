@@ -1,7 +1,0 @@
-{
-  "StackName" : "EMRVPC",
-  "Parameters": {
-    "AvailabilityZone1": "us-east-1c",
-    "AvailabilityZone2": "us-east-1d"
-  }
-}
