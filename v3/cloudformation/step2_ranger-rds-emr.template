@@ -212,7 +212,8 @@ Resources:
         VPC: !Ref 'VPCID'
         KeyName: !Ref 'KeyPairName'
         Subnet: !Ref 'PrivateSubnet1AID'
-        s3artifactsRepo: !Join ['', ['s3://', !Ref 'S3Bucket', '/', !Ref 'S3Key']]
+        S3Bucket: !Ref 'S3Bucket'
+        S3Key: !Ref 'S3Key'
         InstallPrestoRangerPlugin: !Ref 'InstallPrestoRangerPlugin'
       TimeoutInMinutes: '60'
 Outputs:

@@ -1,8 +1,13 @@
 Description: CloudFormation template for creating an EMR cluster
 Outputs:
-  IPAddress:
-    Description: IP address of EMR cluster MasterNode
-    Value: !GetAtt 'EMRSampleCluster.MasterPublicDNS'
+  StackName:
+    Value: !Ref 'AWS::StackName'
+  EMRClusterID:
+    Value: !GetAtt 'LaunchKerberizedCluster.ClusterID'
+    Description: EMR cluster ID
+  EMRClusterURL:
+    Value: !GetAtt 'emrWaitCondition.Data'
+    Description: EMR master node URL
 Parameters:
   DBHostName:
     Description: HostName of the database
@@ -19,6 +24,20 @@ Parameters:
     MinLength: '8'
     NoEcho: 'true'
     Type: String
+  DomainDNSName:
+    AllowedPattern: '[a-zA-Z0-9\-]+\..+'
+    Default: awsemr.com
+    Description: The Active Directory domain that you want to establish the cross-realm
+      trust with e.g., awsemr.com
+    MaxLength: '25'
+    MinLength: '3'
+    Type: String
+  LDAPSearchBase:
+    Description: Ldap group search
+    Type: String
+    Default: dc=awsemr,dc=com
+    AllowedValues:
+      - dc=awsemr,dc=com
   myDirectoryBindUser:
     Description: BindUser Simple AD server
     Type: String
@@ -26,8 +45,12 @@ Parameters:
   myDirectoryBindPassword:
     Description: BindPassword Simple AD server
     Type: String
+  AppsEMR:
+    Description: 'Comma separated list of applications to install on the cluster e.g., '
+    Type: String
+    Default: Hadoop, Spark, Hive, Livy, Hue
   MasterInstanceCount:
-    Default: '1'
+    Default: '3'
     Description: Number of core instances
     Type: Number
   CoreInstanceCount:
@@ -88,20 +111,13 @@ Parameters:
       - '0.7'
       - '1.0'
       - '2.0'
-  s3artifactsRepo:
-    Default: s3://aws-bigdata-blog/artifacts/aws-blog-emr-ranger
-    Description: Git Repo URL for this blog.
+  S3Bucket:
+    Description: S3Bucket where artifacts are stored
     Type: String
-  InstallPrestoRangerPlugin:
-    Description: Install the Ranger Presto Plugin. NOTE - This needs Ranger 2.0 and has not been tested with all versions
-    Default: false
+    Default: aws-bigdata-blog
+  S3Key:
+    Description: S3Key of the Lambda code
     Type: String
-    AllowedValues: [true, false]
-  InstallSparkRangerPlugin:
-    Description: Install the Ranger Spark Plugin. NOTE - This needs Ranger 2.0 and has not been tested with all versions
-    Default: false
-    Type: String
-    AllowedValues: [true, false]
 Conditions:
   emr-5.4: !Equals
     - !Ref 'emrReleaseLabel'
@@ -124,10 +140,6 @@ Conditions:
   emr-6.0: !Equals
     - !Ref 'emrReleaseLabel'
     - emr-6.0.0
-  InstallPrestoRangerPlugin:
-    !Equals [true, !Ref InstallPrestoRangerPlugin]
-  InstallSparkRangerPlugin:
-    !Equals [true, !Ref InstallSparkRangerPlugin]
   OlderEmrVersion: !Or
     - !Condition 'emr-5.0'
     - !Condition 'emr-5.4'
@@ -167,319 +179,117 @@ Resources:
     Properties:
       Roles:
         - !Ref 'EmrEc2Role'
-  EMRClusterKDCOnly:
+  KMSKey:
+    Type: AWS::KMS::Key
     Properties:
-      Instances:
-        CoreInstanceGroup:
-          EbsConfiguration:
-            EbsBlockDeviceConfigs:
-              - VolumeSpecification:
-                  SizeInGB: '100'
-                  VolumeType: gp2
-                VolumesPerInstance: '1'
-            EbsOptimized: 'true'
-          InstanceCount: !Ref 'CoreInstanceCount'
-          InstanceType: !Ref 'CoreInstanceType'
-          Market: ON_DEMAND
-          Name: Core Instance
-        Ec2KeyName: !Ref 'KeyName'
-        Ec2SubnetId: !Ref 'Subnet'
-        MasterInstanceGroup:
-          InstanceCount: '1'
-          EbsConfiguration:
-            EbsBlockDeviceConfigs:
-              - VolumeSpecification:
-                  SizeInGB: '100'
-                  VolumeType: gp2
-                VolumesPerInstance: '1'
-            EbsOptimized: 'true'
-          InstanceType: !Ref 'MasterInstanceType'
-          Market: ON_DEMAND
-          Name: Master Instance
-        TerminationProtected: 'false'
-      JobFlowRole: !Ref EMRInstanceProfile
-      LogUri: !Ref 'EMRLogDir'
-      Name: !Ref 'EMRClusterName'
-      ReleaseLabel: !Ref 'emrReleaseLabel'
-      ServiceRole: !Ref EmrServiceRole
-      Tags:
-        - Key: Name
-          Value: EMR Sample Cluster
-      VisibleToAllUsers: 'true'
-    Type: AWS::EMR::Cluster
-  EMRSampleCluster:
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: key-default-1
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Join
+                - ''
+                - - 'arn:aws:iam::'
+                  - !Ref 'AWS::AccountId'
+                  - :root
+            Action: kms:*
+            Resource: '*'
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt 'EmrEc2Role.Arn'
+            Action: kms:*
+            Resource: '*'
+
+  SecurityConfiguration:
+    Type: AWS::EMR::SecurityConfiguration
     Properties:
-      Applications:
-        - Name: Hive
-#        - Name: Spark
-        - Name: Hue
-        - Name: Hbase
-        - Name: Presto
-      BootstrapActions:
-        - Name: Download scripts
-          ScriptBootstrapAction:
-            Path: !Join
-              - ''
-              - - !Ref 's3artifactsRepo'
-                - /scripts/download-scripts.sh
-            Args:
-              - !Ref 's3artifactsRepo'
-        - Name: Install cloudwatch
-          ScriptBootstrapAction:
-            Path: !Join
-              - ''
-              - - !Ref 's3artifactsRepo'
-                - /scripts/- install-cloudwatch-agent.sh
-      Configurations:
-        - Classification: hue-ini
-          Configurations:
-            - Classification: desktop
-              Configurations:
-                - Classification: database
-                  ConfigurationProperties:
-                    name: "rangerdb"
-                    user: !Ref DBUserName
-                    password: !Ref DBRootPassword
-                    host: !Ref DBHostName
-                    port: 3306
-                    engine: "mysql"
-                - Classification: auth
-                  ConfigurationProperties:
-                    backend: desktop.auth.backend.LdapBackend
-                - Classification: ldap
-                  ConfigurationProperties:
-                    base_dn: dc=awsemr,dc=com
-                    bind_dn: !If
-                      - OlderEmrVersion
-                      - !Ref 'myDirectoryBindUser'
-                      - !Select
-                        - '0'
-                        - !Split
-                          - '@'
-                          - !Ref 'myDirectoryBindUser'
-                    bind_password: !Ref 'myDirectoryBindPassword'
-                    create_users_on_login: 'true'
-                    debug: 'true'
-                    force_username_lowercase: 'true'
-                    ignore_username_case: 'true'
-                    ldap_url: !Join
-                      - ''
-                      - - ldap://
-                        - !Ref 'LDAPServerIP'
-                    ldap_username_pattern: uid=<username>,cn=users,dc=awsemr,dc=com
-                    nt_domain: awsemr.com
-                    search_bind_authentication: 'false'
-                    trace_level: '0'
-                  Configurations:
-                    - Classification: groups
-                      ConfigurationProperties:
-                        group_filter: objectclass=*
-                        group_name_attr: cn
-                    - Classification: users
-                      ConfigurationProperties:
-                        user_filter: objectclass=*
-                        user_name_attr: sAMAccountName
-#        - Classification: core-site
-#          ConfigurationProperties:
-#            hadoop.security.group.mapping: org.apache.hadoop.security.LdapGroupsMapping
-#            hadoop.security.group.mapping.ldap.bind.user: !Ref 'myDirectoryBindUser'
-#            hadoop.security.group.mapping.ldap.bind.password: !Ref 'myDirectoryBindPassword'
-#            hadoop.security.group.mapping.ldap.url: !Join
-#              - ''
-#              - - ldap://
-#                - !Ref 'LDAPServerIP'
-#            hadoop.security.group.mapping.ldap.base: dc=awsemr,dc=com
-#            hadoop.security.group.mapping.ldap.search.filter.user: (objectclass=*)
-#            hadoop.security.group.mapping.ldap.search.filter.group: (objectclass=*)
-#            hadoop.security.group.mapping.ldap.search.attr.member: member
-#            hadoop.security.group.mapping.ldap.search.attr.group.name: cn
-        - Classification: hive-site
-          ConfigurationProperties:
-#            hive.server2.enable.doAs: true
-            javax.jdo.option.ConnectionURL: !Join
-              - ''
-              - - "jdbc:mysql://"
-                - !Ref DBHostName
-                - ":3306/hive?createDatabaseIfNotExist=true"
-            javax.jdo.option.ConnectionDriverName: "org.mariadb.jdbc.Driver"
-            javax.jdo.option.ConnectionUserName: !Ref DBUserName
-            javax.jdo.option.ConnectionPassword: !Ref DBRootPassword
-            hive.server2.authentication: LDAP
-            hive.server2.authentication.ldap.url: !Join
-              - ''
-              - - ldap://
-                - !Ref 'LDAPServerIP'
-            hive.server2.authentication.ldap.Domain: awsemr.com
-        - Classification: oozie-site
-          ConfigurationProperties:
-            oozie.service.JPAService.jdbc.driver: "com.mysql.jdbc.Driver"
-            oozie.service.JPAService.jdbc.url: !Join
-              - ''
-              - - "jdbc:mysql://"
-                - !Ref DBHostName
-                - ":3306/rangerdb"
-            oozie.service.JPAService.jdbc.username: !Ref DBUserName
-            oozie.service.JPAService.jdbc.password: !Ref DBRootPassword
-        - Classification: hive-log4j2
-          ConfigurationProperties:
-            log4j.appender.RANGER_AUDIT: "org.apache.log4j.DailyRollingFileAppender"
-            log4j.appender.RANGER_AUDIT.File: "${hive.log.dir}/ranger-hive-audit.log"
-            log4j.appender.RANGER_AUDIT.layout: "org.apache.log4j.PatternLayout"
-            log4j.appender.RANGER_AUDIT.layout.ConversionPattern: "%m%n"
-            log4j.logger.ranger.audit: "INFO,RANGER_AUDIT"
-      Instances:
-        CoreInstanceGroup:
-          EbsConfiguration:
-            EbsBlockDeviceConfigs:
-              - VolumeSpecification:
-                  SizeInGB: '100'
-                  VolumeType: gp2
-                VolumesPerInstance: '1'
-            EbsOptimized: 'true'
-          InstanceCount: !Ref 'CoreInstanceCount'
-          InstanceType: !Ref 'CoreInstanceType'
-          Market: ON_DEMAND
-          Name: Core Instance
-        Ec2KeyName: !Ref 'KeyName'
-        Ec2SubnetId: !Ref 'Subnet'
-        MasterInstanceGroup:
-          InstanceCount: '1'
-          EbsConfiguration:
-            EbsBlockDeviceConfigs:
-              - VolumeSpecification:
-                  SizeInGB: '100'
-                  VolumeType: gp2
-                VolumesPerInstance: '1'
-            EbsOptimized: 'true'
-          InstanceType: !Ref 'MasterInstanceType'
-          Market: ON_DEMAND
-          Name: Master Instance
-        TerminationProtected: 'false'
-      JobFlowRole: !Ref EMRInstanceProfile
-      LogUri: !Ref 'EMRLogDir'
-      Name: !Ref 'EMRClusterName'
-      ReleaseLabel: !Ref 'emrReleaseLabel'
-      ServiceRole: !Ref EmrServiceRole
-      Tags:
-        - Key: Name
-          Value: EMR Sample Cluster
-      VisibleToAllUsers: 'true'
-    Type: AWS::EMR::Cluster
-  CreateHiveTables:
+      SecurityConfiguration:
+        EncryptionConfiguration:
+          EnableAtRestEncryption: true
+          EnableInTransitEncryption: true
+          AtRestEncryptionConfiguration:
+            S3EncryptionConfiguration:
+              EncryptionMode: SSE-S3
+            LocalDiskEncryptionConfiguration:
+              EncryptionKeyProviderType: AwsKms
+              AwsKmsKey: !GetAtt 'KMSKey.Arn'
+          InTransitEncryptionConfiguration:
+            TLSCertificateConfiguration:
+              CertificateProviderType: PEM
+              S3Object: !Join ['', ["s3://", !Ref S3Bucket, "/", !Ref S3Key,
+                                    '/emr-tls/emr-certs.zip']]
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
     Properties:
-      ActionOnFailure: CONTINUE
-      HadoopJarStep:
-        Args:
-          - /mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/createHiveTables.sh
-          - !Ref 'AWS::Region'
-        Jar: s3://elasticmapreduce/libs/script-runner/script-runner.jar
-        MainClass: ''
-      JobFlowId: !Ref 'EMRSampleCluster'
-      Name: CreateHiveTables
-    Type: AWS::EMR::Step
-  InstallRangerPlugin:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonElasticMapReduceFullAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaRole
+  LaunchEMRClusterFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: LambdaExecutionRole
     Properties:
-      ActionOnFailure: CONTINUE
-      HadoopJarStep:
-        Args:
-          - /mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-hive-hdfs-ranger-plugin.sh
-          - !Ref 'RangerHostname'
-          - !Ref 'rangerVersion'
-          - !Ref 's3artifactsRepo'
-        Jar: s3://elasticmapreduce/libs/script-runner/script-runner.jar
-        MainClass: ''
-      JobFlowId: !Ref 'EMRSampleCluster'
-      Name: InstallRangerPlugin
-    Type: AWS::EMR::Step
-  InstallRangerPolicies:
+      Handler: cremr.handler
+      Role: !GetAtt 'LambdaExecutionRole.Arn'
+      Code:
+        S3Bucket: !Ref S3Bucket
+        S3Key: !Join ['', [!Ref S3Key,
+                           '/launch-cluster.zip']]
+      Runtime: python3.6
+      Timeout: '300'
+  LaunchKerberizedCluster:
+    Type: AWS::CloudFormation::CustomResource
+    DependsOn: LaunchEMRClusterFunction
+    Version: '1.0'
     Properties:
-      ActionOnFailure: CONTINUE
-      HadoopJarStep:
-        Args:
-          - /mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-hive-hdfs-ranger-policies.sh
-          - !Ref 'RangerHostname'
-          - !Join
-            - ''
-            - - !Ref 's3artifactsRepo'
-              - /inputdata
-        Jar: s3://elasticmapreduce/libs/script-runner/script-runner.jar
-        MainClass: ''
-      JobFlowId: !Ref 'EMRSampleCluster'
-      Name: InstallRangerPolicies
-    Type: AWS::EMR::Step
-  InstallRangerPrestoPlugin:
+      ServiceToken: !GetAtt 'LaunchEMRClusterFunction.Arn'
+      SignalURL: !Ref 'emrCreateWaitHandle'
+      loglevel: info
+      subnetID: !Ref 'Subnet'
+      JobFlowRole: !Ref 'EMRInstanceProfile'
+      ServiceRole: !Ref 'EmrServiceRole'
+      S3Bucket: !Ref 'S3Bucket'
+      S3Key: !Ref 'S3Key'
+      EMRSecurityConfig: !Ref 'SecurityConfiguration'
+      LogFolder: !Ref EMRLogDir
+      KeyName: !Ref 'KeyName'
+      StackName: !Ref 'AWS::StackName'
+      StackRegion: !Ref 'AWS::Region'
+      EnableKerberos: "false"
+      ADDomainUser: !Ref 'myDirectoryBindUser'
+      ADDomainUserPassword: !Ref 'myDirectoryBindPassword'
+      MasterInstanceCount: !Ref 'MasterInstanceCount'
+      CoreInstanceCount: !Ref 'CoreInstanceCount'
+      TypeOfInstance: !Ref 'MasterInstanceType'
+      AppsEMR: !Ref 'AppsEMR'
+      emrReleaseLabel: !Ref emrReleaseLabel
+      DomainDNSName: !Ref 'DomainDNSName'
+      LDAPSearchBase: !Ref 'LDAPSearchBase'
+      LDAPHostPrivateIP: !Ref 'LDAPServerIP'
+      RangerHostname: !Ref RangerHostname
+      RangerVersion: !Ref rangerVersion
+      DBHostName: !Ref DBHostName
+      DBUserName: !Ref DBUserName
+      DBRootPassword: !Ref DBRootPassword
+
+  emrCreateWaitHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+    Properties: {}
+  emrWaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    DependsOn: LaunchKerberizedCluster
     Properties:
-      ActionOnFailure: CONTINUE
-      HadoopJarStep:
-        Args:
-          - /mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-presto-ranger-plugin.sh
-          - !Ref 'RangerHostname'
-          - !Ref 'rangerVersion'
-          - !Ref 's3artifactsRepo'
-        Jar: s3://elasticmapreduce/libs/script-runner/script-runner.jar
-        MainClass: ''
-      JobFlowId: !Ref 'EMRSampleCluster'
-      Name: InstallRangerPrestoPlugin
-    Condition: InstallPrestoRangerPlugin
-    Type: AWS::EMR::Step
-  InstallRangerPrestoPolicies:
-    Properties:
-      ActionOnFailure: CONTINUE
-      HadoopJarStep:
-        Args:
-          - /mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-presto-ranger-policies.sh
-          - !Ref 'RangerHostname'
-          - !Join
-            - ''
-            - - !Ref 's3artifactsRepo'
-              - /inputdata
-        Jar: s3://elasticmapreduce/libs/script-runner/script-runner.jar
-        MainClass: ''
-      JobFlowId: !Ref 'EMRSampleCluster'
-      Name: InstallRangerPrestoPolicies
-    Condition: InstallPrestoRangerPlugin
-    Type: AWS::EMR::Step
-  InstallRangerSparkPlugin:
-    Properties:
-      ActionOnFailure: CONTINUE
-      HadoopJarStep:
-        Args:
-          - /mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-spark-ranger-plugin.sh
-          - !Ref 'RangerHostname'
-          - !Ref 'rangerVersion'
-          - !Ref 's3artifactsRepo'
-        Jar: s3://elasticmapreduce/libs/script-runner/script-runner.jar
-        MainClass: ''
-      JobFlowId: !Ref 'EMRSampleCluster'
-      Name: InstallRangerSparkPlugin
-    Condition: InstallSparkRangerPlugin
-    Type: AWS::EMR::Step
-  LoadHDFSData:
-    Properties:
-      ActionOnFailure: CONTINUE
-      HadoopJarStep:
-        Args:
-          - /mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/loadDataIntoHDFS.sh
-          - !Ref 'AWS::Region'
-        Jar: s3://elasticmapreduce/libs/script-runner/script-runner.jar
-        MainClass: ''
-      JobFlowId: !Ref 'EMRSampleCluster'
-      Name: LoadHDFSData
-    Type: AWS::EMR::Step
-  SparkStep:
-    Properties:
-      ActionOnFailure: CONTINUE
-      HadoopJarStep:
-        Args:
-          - spark-submit
-          - --deploy-mode
-          - cluster
-          - --class
-          - org.apache.spark.examples.SparkPi
-          - /usr/lib/spark/examples/jars/spark-examples.jar
-          - '10'
-        Jar: command-runner.jar
-        MainClass: ''
-      JobFlowId: !Ref 'EMRSampleCluster'
-      Name: SparkStep
-    Type: AWS::EMR::Step
+      Handle: !Ref 'emrCreateWaitHandle'
+      Timeout: '4500'
