@@ -1,5 +1,5 @@
-import crhelper
 import boto3
+import crhelper
 
 # initialise logger
 logger = crhelper.log_config({"RequestId": "CONTAINER_INIT"})
@@ -18,6 +18,7 @@ except Exception as e:
 def create(event, context):
     apps = event["ResourceProperties"]["AppsEMR"]
     s3Bucket = event["ResourceProperties"]["S3Bucket"]
+    s3Key = event["ResourceProperties"]["S3Key"]
     emrReleaseLabel = event["ResourceProperties"]["emrReleaseLabel"]
     formatted_applist = apps.split(",")
     applist = []
@@ -57,25 +58,26 @@ def create(event, context):
                 {
                     "Name": "Download scripts",
                     "ScriptBootstrapAction": {
-                        "Path": "s3://" + s3Bucket + "/" + event["ResourceProperties"][
-                            "S3Key"] + "/scripts/download-scripts.sh",
+                        "Path": "s3://" + s3Bucket + "/" + s3Key + "/scripts/download-scripts.sh",
                         "Args": [
-                            "s3://" + s3Bucket + "/" + event["ResourceProperties"]["S3Key"]
+                            "s3://" + s3Bucket + "/" + s3Key
                         ]
                     }
                 },
                 {
                     "Name": "Install cloudwatch agent",
                     "ScriptBootstrapAction": {
-                        "Path": "s3://" + s3Bucket + "/" + event["ResourceProperties"][
-                            "S3Key"] + "/scripts/install-cloudwatch-agent.sh"
+                        "Path": "s3://" + s3Bucket + "/" + s3Key + "/scripts/install-cloudwatch-agent.sh"
                     }
                 },
                 {
                     "Name": "Install ranger agents and policies",
                     "ScriptBootstrapAction": {
-                        "Path": "s3://" + s3Bucket + "/" + event["ResourceProperties"][
-                            "S3Key"] + "/scripts/install-ranger-agents.sh"
+                        "Path": "s3://" + s3Bucket + "/" + s3Key + "/scripts/install-ranger-agents.sh",
+                        "Args": [
+                            s3Bucket, s3Key
+                        ]
+
                     }
                 }
             ],
@@ -90,7 +92,7 @@ def create(event, context):
                             "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-hive-hdfs-ranger-plugin.sh",
                             event["ResourceProperties"]["RangerHostname"],
                             event["ResourceProperties"]["RangerVersion"],
-                            "s3://" + s3Bucket + "/" + event["ResourceProperties"]["S3Key"]
+                            "s3://" + s3Bucket + "/" + s3Key
                         ]
                     }
                 },
@@ -102,7 +104,7 @@ def create(event, context):
                         "Args": [
                             "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-hive-hdfs-ranger-policies.sh",
                             event["ResourceProperties"]["RangerHostname"],
-                            "s3://" + s3Bucket + "/" + event["ResourceProperties"]["S3Key"] + "/inputdata"
+                            "s3://" + s3Bucket + "/" + s3Key + "/inputdata"
                         ]
                     }
                 },
@@ -225,8 +227,9 @@ def create(event, context):
                                         "force_username_lowercase": "true",
                                         "ignore_username_case": "true",
                                         "ldap_url": "ldap://" + event["ResourceProperties"]["LDAPHostPrivateIP"],
-                                        "ldap_username_pattern": "uid' :<username>,,cn=users," + event["ResourceProperties"][
-                                            "LDAPSearchBase"],
+                                        "ldap_username_pattern": "uid' :<username>,,cn=users," +
+                                                                 event["ResourceProperties"][
+                                                                     "LDAPSearchBase"],
                                         "nt_domain": event["ResourceProperties"]["DomainDNSName"],
                                         "search_bind_authentication": "true",
                                         "trace_level": "0",
@@ -243,7 +246,7 @@ def create(event, context):
                                         "user": event["ResourceProperties"]["DBUserName"],
                                         "password": event["ResourceProperties"]["DBRootPassword"],
                                         "host": event["ResourceProperties"]["DBHostName"],
-                                        "port": 3306,
+                                        "port": "3306",
                                         "engine": "mysql"
                                     }
                                 }
@@ -265,7 +268,7 @@ def create(event, context):
                 "javax.jdo.option.ConnectionURL": "jdbc:mysql://" + event["ResourceProperties"][
                     "DBHostName"] + ":3306/hive?createDatabaseIfNotExist=true",
                 "javax.jdo.option.ConnectionDriverName": "LDAP",
-                "javax.jdo.option.ConnectionUserName":event["ResourceProperties"]["DBUserName"],
+                "javax.jdo.option.ConnectionUserName": event["ResourceProperties"]["DBUserName"],
                 "javax.jdo.option.ConnectionPassword": event["ResourceProperties"]["DBRootPassword"],
                 "hive.server2.authentication": "LDAP",
                 "hive.server2.authentication.ldap.url": "ldap://" + event["ResourceProperties"][
