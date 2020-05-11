@@ -267,7 +267,7 @@ def create(event, context):
             "Properties": {
                 "javax.jdo.option.ConnectionURL": "jdbc:mysql://" + event["ResourceProperties"][
                     "DBHostName"] + ":3306/hive?createDatabaseIfNotExist=true",
-                "javax.jdo.option.ConnectionDriverName": "LDAP",
+                "javax.jdo.option.ConnectionDriverName": "org.mariadb.jdbc.Driver",
                 "javax.jdo.option.ConnectionUserName": event["ResourceProperties"]["DBUserName"],
                 "javax.jdo.option.ConnectionPassword": event["ResourceProperties"]["DBRootPassword"],
                 "hive.server2.authentication": "LDAP",
