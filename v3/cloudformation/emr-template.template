@@ -50,7 +50,7 @@ Parameters:
     Type: String
     Default: Hadoop, Spark, Hive, Livy, Hue
   MasterInstanceCount:
-    Default: '3'
+    Default: '1'
     Description: Number of core instances
     Type: Number
   CoreInstanceCount:
