@@ -193,6 +193,7 @@ log4j.category.org.apache.ranger.rest.ServiceREST=debug,xa_log_policy_appender
 log4j.additivity.org.apache.ranger.rest.ServiceREST=false" >> /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/log4j.properties
 sudo ln -s /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/hive/ranger-hive-plugin-$ranger_download_version* /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/
 sudo ln -s /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/hdfs/ranger-hdfs-plugin-$ranger_download_version* /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/
+sudo cp /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/hive/* /usr/lib/ranger/ranger-admin/ews/webapp/WEB-INF/lib/
 sudo /usr/bin/ranger-admin stop || true
 sudo /usr/bin/ranger-admin start
 i=0;
