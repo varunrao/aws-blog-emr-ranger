@@ -42,6 +42,74 @@ ldap_server_url=ldap://$ldap_ip_address
 ldap_base_dn=$2
 ldap_bind_user_dn=$3
 ldap_bind_password=$4
+
+#SSL configs
+#certs_s3_location="s3://MYBUCKET/ranger/certs"
+
+#CHECKTHIS
+certs_s3_location=${11}
+
+certs_path="/tmp/certs"
+
+current_hostname=$(hostname -f)
+
+ranger_agents_certs_path="${certs_path}/RangerAgents-certs"
+ranger_server_certs_path="${certs_path}/RangerServer-certs"
+solr_certs_path="${certs_path}/Solr-certs"
+
+ranger_admin_keystore_alias="ranger-admin"
+ranger_admin_keystore_password="ranger-admin-password"
+ranger_admin_keystore_location="/etc/ranger/admin/conf/ranger-admin.jks"
+
+solr_keystore_location="/etc/solr/conf/solr.jks"
+solr_keystore_alias="solr"
+solr_keystore_password="solr-password"
+
+truststore_location="$JAVA_HOME/jre/lib/security/cacerts"
+truststore_plugins_alias="rangerAgentsTrust"
+truststore_solr_alias="solrTrust"
+truststore_admin_alias="rangerAdminTrust"
+
+#Download certs
+
+mkdir ${certs_path}
+aws s3 sync ${certs_s3_location}/ ${certs_path}
+
+mkdir ${ranger_agents_certs_path}
+mkdir ${ranger_server_certs_path}
+mkdir ${solr_certs_path}
+
+unzip ${ranger_agents_certs_path}.zip -d ${ranger_agents_certs_path}
+unzip ${ranger_server_certs_path}.zip -d ${ranger_server_certs_path}
+unzip ${solr_certs_path} -d ${solr_certs_path}
+
+sudo mkdir -p /etc/ranger/admin/conf
+
+#Setup Keystore RangerAdmin
+
+openssl pkcs12 -export -in ${ranger_server_certs_path}/certificateChain.pem -inkey ${ranger_server_certs_path}/privateKey.pem -chain -CAfile ${ranger_server_certs_path}/trustedCertificates.pem -name ${ranger_admin_keystore_alias} -out ${ranger_server_certs_path}/keystore.p12 -password pass:${ranger_admin_keystore_password}
+sudo keytool -importkeystore -deststorepass ${ranger_admin_keystore_password} -destkeystore ${ranger_admin_keystore_location} -srckeystore ${ranger_server_certs_path}/keystore.p12 -srcstoretype PKCS12 -srcstorepass ${ranger_admin_keystore_password}
+sudo chown ranger:ranger -R /etc/ranger
+
+#Setup Truststore - add RangerServer cert
+
+sudo keytool -import -file ${ranger_agents_certs_path}/trustedCertificates.pem -alias ${truststore_plugins_alias} -keystore ${truststore_location} -storepass changeit -noprompt
+
+#Setup Truststore - add Solr cert
+
+sudo keytool -import -file ${solr_certs_path}/trustedCertificates.pem -alias ${truststore_solr_alias} -keystore ${truststore_location} -storepass changeit -noprompt
+
+#Setup Truststore - add RangerServer cert
+
+sudo keytool -import -file ${ranger_server_certs_path}/trustedCertificates.pem -alias ${truststore_admin_alias} -keystore ${truststore_location} -storepass changeit -noprompt
+
+#Setup Keystore SOLR
+
+sudo mkdir -p /etc/solr/conf
+
+openssl pkcs12 -export -in ${solr_certs_path}/certificateChain.pem -inkey ${solr_certs_path}/privateKey.pem -chain -CAfile ${solr_certs_path}/trustedCertificates.pem -name ${solr_keystore_alias} -out ${solr_certs_path}/keystore.p12 -password pass:${solr_keystore_password}
+sudo keytool -importkeystore -deststorepass ${solr_keystore_password} -destkeystore ${solr_keystore_location} -srckeystore ${solr_certs_path}/keystore.p12 -srcstoretype PKCS12 -srcstorepass ${solr_keystore_password}
+
 # Setup
 yum install -y openldap openldap-clients openldap-servers
 # Setup LDAP users
@@ -120,9 +188,18 @@ sudo sed -i "s|audit_db_password=.*|audit_db_password=rangerlogger|g" install.pr
 sudo sed -i "s|info|debug|g" ews/webapp/WEB-INF/log4j.properties
 
 
+# SSL conf
+sudo sed -i "s|policymgr_external_url=.*|policymgr_external_url=https://$current_hostname:6182|g" install.properties
+sudo sed -i "s|policymgr_http_enabled=.*|policymgr_http_enabled=false|g" install.properties
+sudo sed -i "s|policymgr_https_keystore_file=.*|policymgr_https_keystore_file=${ranger_admin_keystore_location}|g" install.properties
+sudo sed -i "s|policymgr_https_keystore_keyalias=.*|policymgr_https_keystore_keyalias=${ranger_admin_keystore_alias}|g" install.properties
+sudo sed -i "s|policymgr_https_keystore_password=.*|policymgr_https_keystore_password=${ranger_admin_keystore_password}|g" install.properties
+sudo sed -i "s|audit_solr_urls=.*|audit_solr_urls=https://$current_hostname:8984/solr/ranger_audits|g" install.properties
 sudo sed -i "s|audit_store=.*|audit_store=solr|g" install.properties
-sudo sed -i "s|audit_solr_urls=.*|audit_solr_urls=http://localhost:8983/solr/ranger_audits|g" install.properties
-sudo sed -i "s|policymgr_external_url=.*|policymgr_external_url=http://$hostname:6080|g" install.properties
+
+#sudo sed -i "s|audit_solr_urls=.*|audit_solr_urls=http://localhost:8983/solr/ranger_audits|g" install.properties
+#sudo sed -i "s|policymgr_external_url=.*|policymgr_external_url=http://$hostname:6080|g" install.properties
+
 #Update LDAP properties
 sudo sed -i "s|authentication_method=.*|authentication_method=LDAP|g" install.properties
 sudo sed -i "s|xa_ldap_url=.*|xa_ldap_url=$ldap_server_url|g" install.properties
@@ -142,7 +219,6 @@ sudo sed -i "s|admin_keytab=.*|admin_keytab=/etc/awsadmin.keytab|g" install.prop
 sudo sed -i "s|lookup_principal=.*|lookup_principal=Admin@awsemr.com|g" install.properties
 sudo sed -i "s|lookup_keytab=.*|lookup_keytab=/etc/awsadmin.keytab|g" install.properties
 
-
 chmod +x setup.sh
 ./setup.sh
 #Update ranger usersync install.properties
@@ -156,7 +232,9 @@ chmod 755 ./$ranger_user_sync/lib/*
 cd $ranger_user_sync
 
 
-sudo sed -i "s|POLICY_MGR_URL =.*|POLICY_MGR_URL=http://$hostname:6080|g" install.properties
+#sudo sed -i "s|POLICY_MGR_URL =.*|POLICY_MGR_URL=http://$hostname:6080|g" install.properties
+
+sudo sed -i "s|POLICY_MGR_URL=.*|POLICY_MGR_URL=https://$current_hostname:6182|g" install.properties
 sudo sed -i "s|SYNC_SOURCE =.*|SYNC_SOURCE=ldap|g" install.properties
 sudo sed -i "s|SYNC_LDAP_URL =.*|SYNC_LDAP_URL=$ldap_server_url|g" install.properties
 sudo sed -i "s|SYNC_LDAP_BIND_DN =.*|SYNC_LDAP_BIND_DN=$ldap_bind_user_dn|g" install.properties
@@ -170,17 +248,34 @@ sudo sed -i "s|SYNC_LDAP_USER_NAME_ATTRIBUTE =.*|SYNC_LDAP_USER_NAME_ATTRIBUTE=s
 sudo sed -i "s|SYNC_INTERVAL =.*|SYNC_INTERVAL=2|g" install.properties
 chmod +x setup.sh
 ./setup.sh
+
 #Download the install solr for ranger
 cd $installpath
 mkdir solr_for_audit_setup
 tar -xvf solr_for_audit_setup.tar.gz -C solr_for_audit_setup --strip-components=1
 cd solr_for_audit_setup
-sudo sed -i "s|SOLR_HOST_URL=.*|SOLR_HOST_URL=http://$hostname:8983|g" install.properties
-sudo sed -i "s|SOLR_RANGER_PORT=.*|SOLR_RANGER_PORT=8983|g" install.properties
+
+solr_standalone_conf_script="/usr/lib/ranger/solr_for_audit_setup/solr_standalone/scripts/solr.in.sh.j2"
+
+sudo sed -i "s|SOLR_HOST_URL=.*|SOLR_HOST_URL=https://$current_hostname:8984|g" install.properties
+sudo sed -i "s|SOLR_RANGER_PORT=.*|SOLR_RANGER_PORT=8984|g" install.properties
+
+sudo sed -i "s|.*SOLR_SSL_KEY_STORE=.*|SOLR_SSL_KEY_STORE=${solr_keystore_location}|g" ${solr_standalone_conf_script}
+sudo sed -i "s|.*SOLR_SSL_KEY_STORE_PASSWORD=.*|SOLR_SSL_KEY_STORE_PASSWORD=${solr_keystore_password}|g" ${solr_standalone_conf_script}
+sudo sed -i "s|.*SOLR_SSL_TRUST_STORE=.*|SOLR_SSL_TRUST_STORE=$JAVA_HOME/jre/lib/security/cacerts|g" ${solr_standalone_conf_script}
+sudo sed -i "s|.*SOLR_SSL_TRUST_STORE_PASSWORD=.*|SOLR_SSL_TRUST_STORE_PASSWORD=changeit|g" ${solr_standalone_conf_script}
+sudo sed -i "s|.*SOLR_SSL_NEED_CLIENT_AUTH=.*|SOLR_SSL_NEED_CLIENT_AUTH=false|g" ${solr_standalone_conf_script}
+sudo sed -i "s|.*SOLR_SSL_WANT_CLIENT_AUTH=.*|SOLR_SSL_WANT_CLIENT_AUTH=false|g" ${solr_standalone_conf_script}
+
+
+
+#sudo sed -i "s|SOLR_HOST_URL=.*|SOLR_HOST_URL=http://$hostname:8983|g" install.properties
+#sudo sed -i "s|SOLR_RANGER_PORT=.*|SOLR_RANGER_PORT=8983|g" install.properties
 sudo sed -i "s|SOLR_MAX_MEM=.*|SOLR_MAX_MEM=4g|g" install.properties
 sed -i 's/+90DAYS/+2DAYS/g' conf/solrconfig.xml
 chmod +x setup.sh
 ./setup.sh
+
 #Start Ranger Admin
 sudo echo "log4j.appender.xa_log_policy_appender=org.apache.log4j.DailyRollingFileAppender
 log4j.appender.xa_log_policy_appender.file=\${logdir}/ranger_admin_policy_updates.log
@@ -194,10 +289,18 @@ log4j.additivity.org.apache.ranger.rest.ServiceREST=false" >> /usr/lib/ranger/$r
 sudo ln -s /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/hive/ranger-hive-plugin-$ranger_download_version* /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/
 sudo ln -s /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/hdfs/ranger-hdfs-plugin-$ranger_download_version* /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/
 sudo cp /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/hive/* /usr/lib/ranger/ranger-admin/ews/webapp/WEB-INF/lib/
+
+#Setup proper owner for keytabs locations
+sudo chown solr:solr -R /etc/solr
+sudo chown ranger:ranger -R /etc/ranger
+
+#cleanup
+rm -rf ${certs_path}
+
 sudo /usr/bin/ranger-admin stop || true
 sudo /usr/bin/ranger-admin start
 i=0;
-while ! timeout 1 bash -c "echo > /dev/tcp/$hostname/6080"; do
+while ! timeout 1 bash -c "echo > /dev/tcp/$current_hostname/6182"; do
         sleep 10;
         i=$((i + 1))
         if (( i > 6 )); then
