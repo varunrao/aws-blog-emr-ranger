@@ -27,6 +27,59 @@ ranger_s3bucket=$s3bucket/ranger/ranger-$ranger_download_version
 ranger_hdfs_plugin=ranger-$ranger_download_version-hdfs-plugin
 ranger_hive_plugin=ranger-$ranger_download_version-hive-plugin
 
+#SSL configs
+#certs_s3_location="s3://MYBUCKET/ranger/certs"
+
+#CHECKTHIS
+ranger_fqdn=XXXXX
+
+#CHECKTHIS
+certs_s3_location=$4
+certs_path="/tmp/certs"
+
+ranger_agents_certs_path="${certs_path}/RangerAgents-certs"
+ranger_server_certs_path="${certs_path}/RangerServer-certs"
+solr_certs_path="${certs_path}/Solr-certs"
+
+truststore_ranger_server_alias="rangerServerTrust"
+truststore_solr_alias="solrtrust"
+truststore_password="ranger-agent-truststore-password"
+truststore_location="/etc/hadoop/conf/ranger-plugin-truststore.jks"
+
+keystore_alias="rangerAgent"
+keystore_password="ranger-agent-keystore-password"
+keystore_location="/etc/hadoop/conf/ranger-plugin-keystore.jks"
+
+#Download certs
+
+mkdir ${certs_path}
+aws s3 sync ${certs_s3_location}/ ${certs_path}
+
+mkdir ${ranger_agents_certs_path}
+mkdir ${ranger_server_certs_path}
+mkdir ${solr_certs_path}
+
+unzip ${ranger_agents_certs_path}.zip -d ${ranger_agents_certs_path}
+unzip ${ranger_server_certs_path}.zip -d ${ranger_server_certs_path}
+unzip ${solr_certs_path} -d ${solr_certs_path}
+
+#Setup RangerAgents Keystore
+
+openssl pkcs12 -export -in ${ranger_agents_certs_path}/certificateChain.pem -inkey ${ranger_agents_certs_path}/privateKey.pem -chain -CAfile ${ranger_agents_certs_path}/trustedCertificates.pem -name ${keystore_alias} -out ${ranger_agents_certs_path}/keystore.p12 -password pass:${keystore_password}
+keytool -importkeystore -deststorepass ${keystore_password} -destkeystore ${keystore_location} -srckeystore ${ranger_agents_certs_path}/keystore.p12 -srcstoretype PKCS12 -srcstorepass ${keystore_password}
+chmod 444 ${keystore_location}
+
+#Setup Truststore - add RangerServer cert
+
+keytool -import -file ${ranger_server_certs_path}/trustedCertificates.pem -alias ${truststore_ranger_server_alias} -keystore ${truststore_location} -storepass ${truststore_password} -noprompt
+
+#Setup Truststore - add SOLR cert
+
+keytool -import -file ${solr_certs_path}/trustedCertificates.pem -alias ${truststore_solr_alias} -keystore ${truststore_location} -storepass ${truststore_password} -noprompt
+
+#cleanup
+rm -rf ${certs_path}
+
 #Setup
 sudo rm -rf $installpath
 sudo mkdir -p $installpath/hadoop
@@ -58,13 +111,24 @@ sudo cp /usr/lib/hadoop-hdfs/lib/ranger-hdfs-plugin-impl/*.jar /usr/lib/hadoop-h
 #sudo cp -r /usr/lib/ranger/hadoop/etc/hadoop/conf/* /etc/hadoop/conf/
 sudo ln -s /etc/hadoop/ /usr/lib/ranger/hadoop/
 
+#SSL configs
+sudo sed -i "s|POLICY_MGR_URL=.*|POLICY_MGR_URL=https://$ranger_fqdn:6182|g" install.properties
+sudo sed -i "s|SSL_TRUSTSTORE_FILE_PATH=.*|SSL_TRUSTSTORE_FILE_PATH=${truststore_location}|g" install.properties
+sudo sed -i "s|SSL_TRUSTSTORE_PASSWORD=.*|SSL_TRUSTSTORE_PASSWORD=${truststore_password}|g" install.properties
+sudo sed -i "s|SSL_KEYSTORE_FILE_PATH=.*|SSL_KEYSTORE_FILE_PATH=${keystore_location}|g" install.properties
+sudo sed -i "s|SSL_KEYSTORE_PASSWORD=.*|SSL_KEYSTORE_PASSWORD=${keystore_password}|g" install.properties
+
 #Update Ranger URL in HDFS conf
-sudo sed -i "s|POLICY_MGR_URL=.*|POLICY_MGR_URL=http://$ranger_fqdn:6080|g" install.properties
+#sudo sed -i "s|POLICY_MGR_URL=.*|POLICY_MGR_URL=http://$ranger_fqdn:6080|g" install.properties
 sudo sed -i "s|SQL_CONNECTOR_JAR=.*|SQL_CONNECTOR_JAR=$installpath/$mysql_jar|g" install.properties
 sudo sed -i "s|REPOSITORY_NAME=.*|REPOSITORY_NAME=hadoopdev|g" install.properties
-sudo sed -i "s|XAAUDIT.SOLR.URL=.*|XAAUDIT.SOLR.URL=http://$ranger_fqdn:8983/solr/ranger_audits|g" install.properties
-sudo sed -i "s|XAAUDIT.SOLR.SOLR_URL=.*|XAAUDIT.SOLR.SOLR_URL=http://$ranger_fqdn:8983/solr/ranger_audits|g" install.properties
+#sudo sed -i "s|XAAUDIT.SOLR.URL=.*|XAAUDIT.SOLR.URL=http://$ranger_fqdn:8983/solr/ranger_audits|g" install.properties
+#sudo sed -i "s|XAAUDIT.SOLR.SOLR_URL=.*|XAAUDIT.SOLR.SOLR_URL=http://$ranger_fqdn:8983/solr/ranger_audits|g" install.properties
 sudo sed -i "s|XAAUDIT.SOLR.ENABLE=.*|XAAUDIT.SOLR.ENABLE=true|g" install.properties
+
+sudo sed -i "s|XAAUDIT.SOLR.URL=.*|XAAUDIT.SOLR.URL=https://$ranger_fqdn:8984/solr/ranger_audits|g" install.properties
+sudo sed -i "s|XAAUDIT.SOLR.SOLR_URL=.*|XAAUDIT.SOLR.SOLR_URL=https://$ranger_fqdn:8984/solr/ranger_audits|g" install.properties
+
 #Filecache to write to local file system
 sudo mkdir -p /var/log/ranger/audit/
 sudo chmod -R 777 /var/log/ranger/audit/
@@ -75,6 +139,8 @@ sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL.MAXFILES=.*|XAAUDIT.FILECACHE.FILE_S
 sudo -E bash enable-hdfs-plugin.sh
 # new copy cammand - 01/26/2020
 sudo cp -r /etc/hadoop/ranger-*.xml /etc/hadoop/conf/
+
+
 #Update Ranger URL in Hive Conf
 mkdir -p $installpath/hive/lib
 cd $installpath
@@ -85,10 +151,20 @@ ln -s /etc/hive/conf $installpath/hive/conf
 ln -s /usr/lib/hive $installpath/hive/lib
 #export CLASSPATH=$CLASSPATH:/usr/lib/ranger/$ranger_hive_plugin/lib/ranger-*.jar
 sudo -E bash -c 'echo $CLASSPATH'
-sudo sed -i "s|POLICY_MGR_URL=.*|POLICY_MGR_URL=http://$ranger_fqdn:6080|g" install.properties
+
+sudo sed -i "s|POLICY_MGR_URL=.*|POLICY_MGR_URL=https://$ranger_fqdn:6182|g" install.properties
+sudo sed -i "s|SSL_TRUSTSTORE_FILE_PATH=.*|SSL_TRUSTSTORE_FILE_PATH=${truststore_location}|g" install.properties
+sudo sed -i "s|SSL_TRUSTSTORE_PASSWORD=.*|SSL_TRUSTSTORE_PASSWORD=${truststore_password}|g" install.properties
+sudo sed -i "s|SSL_KEYSTORE_FILE_PATH=.*|SSL_KEYSTORE_FILE_PATH=${keystore_location}|g" install.properties
+sudo sed -i "s|SSL_KEYSTORE_PASSWORD=.*|SSL_KEYSTORE_PASSWORD=${keystore_password}|g" install.properties
+
+sudo sed -i "s|XAAUDIT.SOLR.URL=.*|XAAUDIT.SOLR.URL=https://$ranger_fqdn:8984/solr/ranger_audits|g" install.properties
+sudo sed -i "s|XAAUDIT.SOLR.SOLR_URL=.*|XAAUDIT.SOLR.SOLR_URL=https://$ranger_fqdn:8984/solr/ranger_audits|g" install.properties
+
+#sudo sed -i "s|POLICY_MGR_URL=.*|POLICY_MGR_URL=http://$ranger_fqdn:6080|g" install.properties
 sudo sed -i "s|SQL_CONNECTOR_JAR=.*|SQL_CONNECTOR_JAR=/usr/lib/ranger/$mysql_jar|g" install.properties
 sudo sed -i "s|REPOSITORY_NAME=.*|REPOSITORY_NAME=hivedev|g" install.properties
-sudo sed -i "s|XAAUDIT.SOLR.URL=.*|XAAUDIT.SOLR.URL=http://$ranger_fqdn:8983/solr/ranger_audits|g" install.properties
+#sudo sed -i "s|XAAUDIT.SOLR.URL=.*|XAAUDIT.SOLR.URL=http://$ranger_fqdn:8983/solr/ranger_audits|g" install.properties
 sudo sed -i "s|XAAUDIT.SOLR.ENABLE=.*|XAAUDIT.SOLR.ENABLE=true|g" install.properties
 sudo sed -i "s|XAAUDIT.LOG4J.IS_ENABLED=.*|XAAUDIT.LOG4J.IS_ENABLED=true|g" install.properties
 sudo sed -i "s|XAAUDIT.LOG4J.LOGGER=.*|XAAUDIT.LOG4J.LOGGER=ranger.audit|g" install.properties
