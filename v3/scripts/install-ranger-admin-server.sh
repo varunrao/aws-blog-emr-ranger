@@ -47,15 +47,15 @@ ldap_bind_password=$4
 #certs_s3_location="s3://MYBUCKET/ranger/certs"
 
 #CHECKTHIS
-certs_s3_location=${11}
+certs_s3_location=${s3bucket_http_url}/emr-tls/
 
 certs_path="/tmp/certs"
 
 current_hostname=$(hostname -f)
 
-ranger_agents_certs_path="${certs_path}/RangerAgents-certs"
-ranger_server_certs_path="${certs_path}/RangerServer-certs"
-solr_certs_path="${certs_path}/Solr-certs"
+ranger_agents_certs_path="${certs_path}/ranger-server-certs"
+ranger_server_certs_path="${certs_path}/ranger-agents-certs"
+solr_certs_path="${certs_path}/solr-client-certs"
 
 ranger_admin_keystore_alias="ranger-admin"
 ranger_admin_keystore_password="ranger-admin-password"

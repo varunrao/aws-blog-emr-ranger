@@ -27,19 +27,13 @@ ranger_s3bucket=$s3bucket/ranger/ranger-$ranger_download_version
 ranger_hdfs_plugin=ranger-$ranger_download_version-hdfs-plugin
 ranger_hive_plugin=ranger-$ranger_download_version-hive-plugin
 
-#SSL configs
-#certs_s3_location="s3://MYBUCKET/ranger/certs"
-
-#CHECKTHIS
-ranger_fqdn=XXXXX
-
-#CHECKTHIS
-certs_s3_location=$4
+## Cert configuration
+certs_s3_location=${s3bucket}/emr-tls/
 certs_path="/tmp/certs"
 
-ranger_agents_certs_path="${certs_path}/RangerAgents-certs"
-ranger_server_certs_path="${certs_path}/RangerServer-certs"
-solr_certs_path="${certs_path}/Solr-certs"
+ranger_agents_certs_path="${certs_path}/ranger-server-certs"
+ranger_server_certs_path="${certs_path}/ranger-agents-certs"
+solr_certs_path="${certs_path}/solr-client-certs"
 
 truststore_ranger_server_alias="rangerServerTrust"
 truststore_solr_alias="solrtrust"
