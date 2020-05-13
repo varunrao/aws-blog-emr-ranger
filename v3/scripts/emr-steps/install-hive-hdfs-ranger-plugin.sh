@@ -5,7 +5,9 @@ set -x
 export JAVA_HOME=/usr/lib/jvm/java-openjdk
 sudo -E bash -c 'echo $JAVA_HOME'
 installpath=/usr/lib/ranger
-ranger_fqdn=$1
+ranger_ip=$1
+
+ranger_fqdn=$(nslookup ${ranger_ip} | grep "name" | awk '{print $4}' | sed 's/.$//')
 #mysql_jar_location=http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.39/mysql-connector-java-5.1.39.jar
 mysql_jar=mysql-connector-java-5.1.39.jar
 ranger_version=$2
