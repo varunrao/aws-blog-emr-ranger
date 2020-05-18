@@ -43,10 +43,6 @@ ldap_base_dn=$2
 ldap_bind_user_dn=$3
 ldap_bind_password=$4
 
-#SSL configs
-#certs_s3_location="s3://MYBUCKET/ranger/certs"
-
-#CHECKTHIS
 certs_s3_location=${s3bucket_http_url}/emr-tls/
 
 certs_path="/tmp/certs"
@@ -65,7 +61,7 @@ solr_keystore_location="/etc/solr/conf/solr.jks"
 solr_keystore_alias="solr"
 solr_keystore_password="solr-password"
 
-truststore_location="$JAVA_HOME/jre/lib/security/cacerts"
+truststore_location="$JAVA_HOME/lib/security/cacerts"
 truststore_plugins_alias="rangerAgentsTrust"
 truststore_solr_alias="solrTrust"
 truststore_admin_alias="rangerAdminTrust"
@@ -73,7 +69,7 @@ truststore_admin_alias="rangerAdminTrust"
 #Download certs
 
 mkdir ${certs_path}
-aws s3 sync ${certs_s3_location}/ ${certs_path}
+aws s3 sync ${certs_s3_location} ${certs_path}
 
 mkdir ${ranger_agents_certs_path}
 mkdir ${ranger_server_certs_path}
