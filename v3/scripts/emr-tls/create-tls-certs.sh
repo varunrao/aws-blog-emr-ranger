@@ -10,7 +10,6 @@ generate_certs() {
   zip -r -X $1-certs.zip certificateChain.pem privateKey.pem trustedCertificates.pem
   rm -rf *.pem
 }
-
 generate_certs ranger-server
 generate_certs ranger-agents
 generate_certs solr-client
