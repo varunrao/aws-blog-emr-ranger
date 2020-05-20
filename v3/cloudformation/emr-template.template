@@ -48,7 +48,7 @@ Parameters:
   AppsEMR:
     Description: 'Comma separated list of applications to install on the cluster e.g., '
     Type: String
-    Default: Hadoop, Spark, Hive, Livy, Hue
+    Default: Hadoop, Hive, Hue
   MasterInstanceCount:
     Default: '1'
     Description: Number of core instances
