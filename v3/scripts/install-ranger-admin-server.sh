@@ -67,7 +67,6 @@ truststore_solr_alias="solrTrust"
 truststore_admin_alias="rangerAdminTrust"
 
 #Download certs
-
 mkdir ${certs_path}
 aws s3 sync ${certs_s3_location} ${certs_path}
 
