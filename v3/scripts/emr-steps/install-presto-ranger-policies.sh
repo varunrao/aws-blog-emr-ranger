@@ -10,6 +10,7 @@ hostname=`hostname -I | xargs`
 hdfs_namenode_fqdn=$hostname
 hive_server2_fqdn=$hostname
 ranger_policybucket=$2
+
 #Update repo/policies
 sudo rm -rf $installpath
 sudo mkdir -p $installpath

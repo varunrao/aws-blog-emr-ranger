@@ -11,7 +11,6 @@ mysql_jar=mysql-connector-java-5.1.39.jar
 s3bucket=$3
 ranger_version=$2
 ranger_fqdn=$1
-
 ranger_download_version=0.5
 if [ "$ranger_version" == "2.0" ]; then
    ranger_download_version=2.1.0-SNAPSHOT
