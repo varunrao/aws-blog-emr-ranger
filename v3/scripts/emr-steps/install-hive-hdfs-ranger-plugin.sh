@@ -49,7 +49,7 @@ keystore_location="/etc/hadoop/conf/ranger-plugin-keystore.jks"
 #Download certs
 
 mkdir ${certs_path}
-aws s3 sync ${certs_s3_location}/ ${certs_path}
+aws s3 sync ${certs_s3_location} ${certs_path}
 
 mkdir ${ranger_agents_certs_path}
 mkdir ${ranger_server_certs_path}
