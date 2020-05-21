@@ -76,7 +76,7 @@ mkdir ${solr_certs_path}
 
 unzip ${ranger_agents_certs_path}.zip -d ${ranger_agents_certs_path}
 unzip ${ranger_server_certs_path}.zip -d ${ranger_server_certs_path}
-unzip ${solr_certs_path} -d ${solr_certs_path}
+unzip ${solr_certs_path}.zip -d ${solr_certs_path}
 
 sudo mkdir -p /etc/ranger/admin/conf
 
@@ -84,7 +84,7 @@ sudo mkdir -p /etc/ranger/admin/conf
 
 openssl pkcs12 -export -in ${ranger_server_certs_path}/certificateChain.pem -inkey ${ranger_server_certs_path}/privateKey.pem -chain -CAfile ${ranger_server_certs_path}/trustedCertificates.pem -name ${ranger_admin_keystore_alias} -out ${ranger_server_certs_path}/keystore.p12 -password pass:${ranger_admin_keystore_password}
 sudo keytool -importkeystore -deststorepass ${ranger_admin_keystore_password} -destkeystore ${ranger_admin_keystore_location} -srckeystore ${ranger_server_certs_path}/keystore.p12 -srcstoretype PKCS12 -srcstorepass ${ranger_admin_keystore_password}
-sudo chown ranger:ranger -R /etc/ranger
+#sudo chown ranger:ranger -R /etc/ranger
 
 #Setup Truststore - add RangerServer cert
 
@@ -148,6 +148,7 @@ _generateSQLGrantsAndCreateUser()
     HOSTNAMEI=`echo ${HOSTNAMEI}`
     cat >~/generate_grants.sql <<EOF
 CREATE USER IF NOT EXISTS '${RDS_RANGER_SCHEMA_DBUSER}'@'localhost' IDENTIFIED BY '${RDS_RANGER_SCHEMA_DBPASSWORD}';
+CREATE DATABASE ${RDS_RANGER_SCHEMA_DBNAME};
 GRANT ALL PRIVILEGES ON \`%\`.* TO '${RDS_RANGER_SCHEMA_DBUSER}'@'localhost';
 CREATE USER IF NOT EXISTS '${RDS_RANGER_SCHEMA_DBUSER}'@'%' IDENTIFIED BY '${RDS_RANGER_SCHEMA_DBPASSWORD}';
 GRANT ALL PRIVILEGES ON \`%\`.* TO '${RDS_RANGER_SCHEMA_DBUSER}'@'%';
@@ -214,8 +215,15 @@ sudo sed -i "s|admin_keytab=.*|admin_keytab=/etc/awsadmin.keytab|g" install.prop
 sudo sed -i "s|lookup_principal=.*|lookup_principal=Admin@awsemr.com|g" install.properties
 sudo sed -i "s|lookup_keytab=.*|lookup_keytab=/etc/awsadmin.keytab|g" install.properties
 
+#CHECKTHIS - FIX FOR java.lang.NoClassDefFoundError: org/apache/htrace/core/Tracer$Builder
+sudo cp /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/htrace-core4-4.1.0-incubating.jar /usr/lib/ranger/$ranger_admin_server/cred/lib
+
 chmod +x setup.sh
 ./setup.sh
+
+#CHECKTHIS - FIX FOR Unable to get the Credential Provider from the Configuration when launching the server
+sudo sed -i "s|.*rangeradmin.jceks.*|<value>localjceks://file//usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/conf/.jceks/rangeradmin.jceks</value>|g" /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/conf/ranger-admin-default-site.xml
+
 #Update ranger usersync install.properties
 cd $installpath
 mkdir $ranger_user_sync
@@ -229,6 +237,7 @@ cd $ranger_user_sync
 
 #sudo sed -i "s|POLICY_MGR_URL =.*|POLICY_MGR_URL=http://$hostname:6080|g" install.properties
 
+sudo sed -i "s|POLICY_MGR_URL =.*|POLICY_MGR_URL=https://$current_hostname:6182|g" install.properties
 sudo sed -i "s|POLICY_MGR_URL=.*|POLICY_MGR_URL=https://$current_hostname:6182|g" install.properties
 sudo sed -i "s|SYNC_SOURCE =.*|SYNC_SOURCE=ldap|g" install.properties
 sudo sed -i "s|SYNC_LDAP_URL =.*|SYNC_LDAP_URL=$ldap_server_url|g" install.properties
@@ -257,7 +266,7 @@ sudo sed -i "s|SOLR_RANGER_PORT=.*|SOLR_RANGER_PORT=8984|g" install.properties
 
 sudo sed -i "s|.*SOLR_SSL_KEY_STORE=.*|SOLR_SSL_KEY_STORE=${solr_keystore_location}|g" ${solr_standalone_conf_script}
 sudo sed -i "s|.*SOLR_SSL_KEY_STORE_PASSWORD=.*|SOLR_SSL_KEY_STORE_PASSWORD=${solr_keystore_password}|g" ${solr_standalone_conf_script}
-sudo sed -i "s|.*SOLR_SSL_TRUST_STORE=.*|SOLR_SSL_TRUST_STORE=$JAVA_HOME/jre/lib/security/cacerts|g" ${solr_standalone_conf_script}
+sudo sed -i "s|.*SOLR_SSL_TRUST_STORE=.*|SOLR_SSL_TRUST_STORE=$JAVA_HOME/lib/security/cacerts|g" ${solr_standalone_conf_script}
 sudo sed -i "s|.*SOLR_SSL_TRUST_STORE_PASSWORD=.*|SOLR_SSL_TRUST_STORE_PASSWORD=changeit|g" ${solr_standalone_conf_script}
 sudo sed -i "s|.*SOLR_SSL_NEED_CLIENT_AUTH=.*|SOLR_SSL_NEED_CLIENT_AUTH=false|g" ${solr_standalone_conf_script}
 sudo sed -i "s|.*SOLR_SSL_WANT_CLIENT_AUTH=.*|SOLR_SSL_WANT_CLIENT_AUTH=false|g" ${solr_standalone_conf_script}
@@ -283,6 +292,8 @@ log4j.category.org.apache.ranger.rest.ServiceREST=debug,xa_log_policy_appender
 log4j.additivity.org.apache.ranger.rest.ServiceREST=false" >> /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/log4j.properties
 sudo ln -s /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/hive/ranger-hive-plugin-$ranger_download_version* /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/
 sudo ln -s /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/hdfs/ranger-hdfs-plugin-$ranger_download_version* /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/
+
+#CHECKTHIS - wrong path
 sudo cp /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/hive/* /usr/lib/ranger/ranger-admin/ews/webapp/WEB-INF/lib/
 
 #Setup proper owner for keytabs locations
@@ -305,7 +316,7 @@ done
 #Start Ranger Usersync
 sudo /usr/bin/ranger-usersync stop || true
 sudo /usr/bin/ranger-usersync start
-cd $installpath
+#cd $installpath
 # Restart SOLR
 sudo /opt/solr/ranger_audit_server/scripts/stop_solr.sh || true
 sudo /opt/solr/ranger_audit_server/scripts/start_solr.sh
