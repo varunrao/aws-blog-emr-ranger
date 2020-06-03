@@ -1,6 +1,6 @@
 {
-"policyName": "Analyst2Policy",
-"resourceName": "/user/analyst2,/tmp/",
+"policyName": "user-access",
+"resourceName": "/user/{USER},/var/log/{USER},/tmp/{USER}",
 "description": "Home",
 "repositoryName": "hadoopdev",
 "repositoryType": "hdfs",
@@ -10,7 +10,7 @@
 "permMapList": [ 
 {
  "userList": [
- "analyst2"
+ "{USER}"
  ],
  "permList": [
  "read",
