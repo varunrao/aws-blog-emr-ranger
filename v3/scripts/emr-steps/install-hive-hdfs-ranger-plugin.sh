@@ -57,7 +57,7 @@ mkdir ${solr_certs_path}
 
 unzip ${ranger_agents_certs_path}.zip -d ${ranger_agents_certs_path}
 unzip ${ranger_server_certs_path}.zip -d ${ranger_server_certs_path}
-unzip ${solr_certs_path} -d ${solr_certs_path}
+unzip ${solr_certs_path}.zip -d ${solr_certs_path}
 
 #Setup RangerAgents Keystore
 
@@ -132,6 +132,10 @@ sudo sed -i "s|XAAUDIT.FILECACHE.IS_ENABLED=.*|XAAUDIT.FILECACHE.IS_ENABLED=true
 sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL_DIR=.*|XAAUDIT.FILECACHE.FILE_SPOOL_DIR=/var/log/ranger/audit/|g" install.properties
 sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL.ROLLOVER.SECS=.*|XAAUDIT.FILECACHE.FILE_SPOOL.ROLLOVER.SECS=30|g" install.properties
 sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL.MAXFILES=.*|XAAUDIT.FILECACHE.FILE_SPOOL.MAXFILES=10|g" install.properties
+
+#to solve java.lang.NoClassDefFoundError: org/apache/commons/configuration/Configuration
+sed -i 's/jceks:\/\/file/localjceks:\/\/file/' enable-hdfs-plugin.sh
+
 sudo -E bash enable-hdfs-plugin.sh
 # new copy cammand - 01/26/2020
 sudo cp -r /etc/hadoop/ranger-*.xml /etc/hadoop/conf/
@@ -169,6 +173,11 @@ sudo sed -i "s|XAAUDIT.FILECACHE.IS_ENABLED=.*|XAAUDIT.FILECACHE.IS_ENABLED=true
 sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL_DIR=.*|XAAUDIT.FILECACHE.FILE_SPOOL_DIR=/var/log/ranger/audit/|g" install.properties
 sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL.ROLLOVER.SECS=.*|XAAUDIT.FILECACHE.FILE_SPOOL.ROLLOVER.SECS=30|g" install.properties
 sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL.MAXFILES=.*|XAAUDIT.FILECACHE.FILE_SPOOL.MAXFILES=10|g" install.properties
+
+
+#to solve java.lang.NoClassDefFoundError: org/apache/commons/configuration/Configuration
+sed -i 's/jceks:\/\/file/localjceks:\/\/file/' enable-hive-plugin.sh
+
 sudo -E bash enable-hive-plugin.sh
 #sudo cp /usr/lib/hive/ranger-*.jar /usr/lib/hive/lib/
 sudo cp $installpath/$ranger_hive_plugin/lib/ranger-hive-plugin-impl/*.jar /usr/lib/hive/
