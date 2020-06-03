@@ -36,4 +36,4 @@ STORED AS SEQUENCEFILE
 LOCATION '$hive_script_data_location/joined_impressions/';
 MSCK REPAIR TABLE tblanalyst2;
 " >> createTable.hql
-hive -f createTable.hql
+sudo -u hive hive -f createTable.hql
