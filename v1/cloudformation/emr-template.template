@@ -186,6 +186,9 @@ Resources:
             hadoop.security.group.mapping.ldap.search.filter.group: (objectclass=*)
             hadoop.security.group.mapping.ldap.search.attr.member: member
             hadoop.security.group.mapping.ldap.search.attr.group.name: cn
+        - Classification: hdfs-site
+          ConfigurationProperties:
+            fs.permissions.umask-mode: 077
       Instances:
         CoreInstanceGroup:
           EbsConfiguration:

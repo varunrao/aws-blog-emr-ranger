@@ -14,7 +14,7 @@ ranger_download_version=0.5
 if [ "$ranger_version" == "2.0" ]; then
    ranger_download_version=2.1.0-SNAPSHOT
 elif [ "$ranger_version" == "1.0" ]; then
-   ranger_download_version=1.2.1-SNAPSHOT
+   ranger_download_version=1.1.0
 elif [ "$ranger_version" == "0.7" ]; then
    ranger_download_version=0.7.1
 elif [ "$ranger_version" == "0.6" ]; then
