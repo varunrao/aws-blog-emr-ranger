@@ -20,6 +20,7 @@ sudo sed -i "s|emr_masternode|$hdfs_namenode_fqdn|g" ranger-hdfs-repo.json
 sudo sed -i "s|emr_masternode|$hive_server2_fqdn|g" ranger-hive-repo.json
 curl -iv -u admin:admin -d @ranger-hdfs-repo.json -H "Content-Type: application/json" -X POST http://$ranger_server_fqdn:6080/service/public/api/repository/
 curl -iv -u admin:admin -d @ranger-hive-repo.json -H "Content-Type: application/json" -X POST http://$ranger_server_fqdn:6080/service/public/api/repository/
+curl -iv -u admin:admin -d @ranger-hdfs-policy-user.json -H "Content-Type: application/json" -X POST http://$ranger_server_fqdn:6080/service/public/api/policy/ || true
 curl -iv -u admin:admin -d @ranger-hdfs-policy-analyst1.json -H "Content-Type: application/json" -X POST http://$ranger_server_fqdn:6080/service/public/api/policy/
 curl -iv -u admin:admin -d @ranger-hdfs-policy-analyst2.json -H "Content-Type: application/json" -X POST http://$ranger_server_fqdn:6080/service/public/api/policy/
 curl -iv -u admin:admin -d @ranger-hive-policy-analyst1.json -H "Content-Type: application/json" -X POST http://$ranger_server_fqdn:6080/service/public/api/policy/

@@ -1,6 +1,6 @@
 {
 "policyName": "Analyst1Policy",
-"resourceName": "/user/analyst1",
+"resourceName": "/user/analyst1,/tmp/",
 "description": "Home",
 "repositoryName": "hadoopdev",
 "repositoryType": "hdfs",
