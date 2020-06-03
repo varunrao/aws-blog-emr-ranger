@@ -48,7 +48,7 @@ Parameters:
     Description: VPC ID for creating the EMR cluster
     Type: AWS::EC2::VPC::Id
   emrReleaseLabel:
-    Default: emr-5.4.0
+    Default: emr-5.29.0
     AllowedValues:
       - emr-5.0.0
       - emr-5.4.0
@@ -224,6 +224,18 @@ Resources:
           Value: EMR Sample Cluster
       VisibleToAllUsers: 'true'
     Type: AWS::EMR::Cluster
+  LoadHDFSData:
+    Properties:
+      ActionOnFailure: CONTINUE
+      HadoopJarStep:
+        Args:
+          - /mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/loadDataIntoHDFS.sh
+          - !Ref 'AWS::Region'
+        Jar: s3://elasticmapreduce/libs/script-runner/script-runner.jar
+        MainClass: ''
+      JobFlowId: !Ref 'EMRSampleCluster'
+      Name: LoadHDFSData
+    Type: AWS::EMR::Step
   CreateHiveTables:
     Properties:
       ActionOnFailure: CONTINUE
@@ -235,6 +247,23 @@ Resources:
         MainClass: ''
       JobFlowId: !Ref 'EMRSampleCluster'
       Name: CreateHiveTables
+    Type: AWS::EMR::Step
+  SparkStep:
+    Properties:
+      ActionOnFailure: CONTINUE
+      HadoopJarStep:
+        Args:
+          - spark-submit
+          - --deploy-mode
+          - cluster
+          - --class
+          - org.apache.spark.examples.SparkPi
+          - /usr/lib/spark/examples/jars/spark-examples.jar
+          - '10'
+        Jar: command-runner.jar
+        MainClass: ''
+      JobFlowId: !Ref 'EMRSampleCluster'
+      Name: SparkStep
     Type: AWS::EMR::Step
   InstallRangerPlugin:
     Properties:
@@ -312,33 +341,4 @@ Resources:
       JobFlowId: !Ref 'EMRSampleCluster'
       Name: InstallRangerSparkPlugin
     Condition: InstallSparkRangerPlugin
-    Type: AWS::EMR::Step
-  LoadHDFSData:
-    Properties:
-      ActionOnFailure: CONTINUE
-      HadoopJarStep:
-        Args:
-          - /mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/loadDataIntoHDFS.sh
-          - !Ref 'AWS::Region'
-        Jar: s3://elasticmapreduce/libs/script-runner/script-runner.jar
-        MainClass: ''
-      JobFlowId: !Ref 'EMRSampleCluster'
-      Name: LoadHDFSData
-    Type: AWS::EMR::Step
-  SparkStep:
-    Properties:
-      ActionOnFailure: CONTINUE
-      HadoopJarStep:
-        Args:
-          - spark-submit
-          - --deploy-mode
-          - cluster
-          - --class
-          - org.apache.spark.examples.SparkPi
-          - /usr/lib/spark/examples/jars/spark-examples.jar
-          - '10'
-        Jar: command-runner.jar
-        MainClass: ''
-      JobFlowId: !Ref 'EMRSampleCluster'
-      Name: SparkStep
     Type: AWS::EMR::Step
