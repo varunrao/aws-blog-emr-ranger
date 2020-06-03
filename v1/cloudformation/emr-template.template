@@ -188,7 +188,7 @@ Resources:
             hadoop.security.group.mapping.ldap.search.attr.group.name: cn
         - Classification: hdfs-site
           ConfigurationProperties:
-            fs.permissions.umask-mode: 077
+            fs.permissions.umask-mode: '077'
       Instances:
         CoreInstanceGroup:
           EbsConfiguration:
@@ -251,23 +251,23 @@ Resources:
       JobFlowId: !Ref 'EMRSampleCluster'
       Name: CreateHiveTables
     Type: AWS::EMR::Step
-  SparkStep:
-    Properties:
-      ActionOnFailure: CONTINUE
-      HadoopJarStep:
-        Args:
-          - spark-submit
-          - --deploy-mode
-          - cluster
-          - --class
-          - org.apache.spark.examples.SparkPi
-          - /usr/lib/spark/examples/jars/spark-examples.jar
-          - '10'
-        Jar: command-runner.jar
-        MainClass: ''
-      JobFlowId: !Ref 'EMRSampleCluster'
-      Name: SparkStep
-    Type: AWS::EMR::Step
+#  SparkStep:
+#    Properties:
+#      ActionOnFailure: CONTINUE
+#      HadoopJarStep:
+#        Args:
+#          - spark-submit
+#          - --deploy-mode
+#          - cluster
+#          - --class
+#          - org.apache.spark.examples.SparkPi
+#          - /usr/lib/spark/examples/jars/spark-examples.jar
+#          - '10'
+#        Jar: command-runner.jar
+#        MainClass: ''
+#      JobFlowId: !Ref 'EMRSampleCluster'
+#      Name: SparkStep
+#    Type: AWS::EMR::Step
   InstallRangerPlugin:
     Properties:
       ActionOnFailure: CONTINUE
