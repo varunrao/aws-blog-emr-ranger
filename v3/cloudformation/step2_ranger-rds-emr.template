@@ -118,11 +118,6 @@ Parameters:
     MinLength: '8'
     NoEcho: 'true'
     Type: String
-  InstallPrestoRangerPlugin:
-    Description: Install the Ranger Presto Plugin. NOTE - This needs Ranger 2.0 and has not been tested with all versions
-    Default: false
-    Type: String
-    AllowedValues: [true, false]
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -214,7 +209,6 @@ Resources:
         Subnet: !Ref 'PrivateSubnet1AID'
         S3Bucket: !Ref 'S3Bucket'
         S3Key: !Ref 'S3Key'
-        InstallPrestoRangerPlugin: !Ref 'InstallPrestoRangerPlugin'
       TimeoutInMinutes: '60'
 Outputs:
   RDSInstanceAddress:

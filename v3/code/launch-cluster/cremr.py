@@ -75,7 +75,11 @@ def create(event, context):
                     "ScriptBootstrapAction": {
                         "Path": "s3://" + s3Bucket + "/" + s3Key + "/scripts/install-ranger-agents.sh",
                         "Args": [
-                            s3Bucket, s3Key
+                            s3Bucket,
+                            s3Key,
+                            event["ResourceProperties"]["RangerHostname"],
+                            event["ResourceProperties"]["RangerVersion"],
+                            "s3://" + s3Bucket + "/" + s3Key
                         ]
 
                     }
