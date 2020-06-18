@@ -1,7 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 set -x
-export JAVA_HOME=/usr/lib/jvm/java-openjdk
+if [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+  echo "found java executable in JAVA_HOME"
+else
+  export JAVA_HOME=/usr/lib/jvm/java-openjdk
+fi
 sudo -E bash -c 'echo $JAVA_HOME'
 installpath=/usr/lib/ranger-pugins
 ranger_server_fqdn=$1

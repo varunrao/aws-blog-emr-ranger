@@ -59,6 +59,7 @@ Parameters:
       - emr-5.28.0
       - emr-5.28.1
       - emr-5.29.0
+      - emr-5.30.0
     Description: Release label for the EMR cluster
     Type: String
   rangerVersion:
@@ -79,11 +80,11 @@ Parameters:
     Default: false
     Type: String
     AllowedValues: [true, false]
-  InstallSparkRangerPlugin:
-    Description: Install the Ranger Spark Plugin. NOTE - This needs Ranger 2.0 and has not been tested with all versions
-    Default: false
-    Type: String
-    AllowedValues: [true, false]
+#  InstallSparkRangerPlugin:
+#    Description: Install the Ranger Spark Plugin. NOTE - This needs Ranger 2.0 and has not been tested with all versions
+#    Default: false
+#    Type: String
+#    AllowedValues: [true, false]
 Conditions:
   emr-5.4: !Equals
     - !Ref 'emrReleaseLabel'
@@ -108,8 +109,8 @@ Conditions:
     - emr-6.0.0
   InstallPrestoRangerPlugin:
     !Equals [true, !Ref InstallPrestoRangerPlugin]
-  InstallSparkRangerPlugin:
-    !Equals [true, !Ref InstallSparkRangerPlugin]
+#  InstallSparkRangerPlugin:
+#    !Equals [true, !Ref InstallSparkRangerPlugin]
   OlderEmrVersion: !Or
     - !Condition 'emr-5.0'
     - !Condition 'emr-5.4'
@@ -118,10 +119,8 @@ Resources:
     Properties:
       Applications:
         - Name: Hive
-        - Name: Spark
+        - Name: Hadoop
         - Name: Hue
-        - Name: Hbase
-        - Name: Presto
       BootstrapActions:
         - Name: Download scripts
           ScriptBootstrapAction:
@@ -330,18 +329,18 @@ Resources:
       Name: InstallRangerPrestoPolicies
     Condition: InstallPrestoRangerPlugin
     Type: AWS::EMR::Step
-  InstallRangerSparkPlugin:
-    Properties:
-      ActionOnFailure: CONTINUE
-      HadoopJarStep:
-        Args:
-          - /mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-spark-ranger-plugin.sh
-          - !Ref 'RangerHostname'
-          - !Ref 'rangerVersion'
-          - !Ref 's3artifactsRepo'
-        Jar: s3://elasticmapreduce/libs/script-runner/script-runner.jar
-        MainClass: ''
-      JobFlowId: !Ref 'EMRSampleCluster'
-      Name: InstallRangerSparkPlugin
-    Condition: InstallSparkRangerPlugin
-    Type: AWS::EMR::Step
+#  InstallRangerSparkPlugin:
+#    Properties:
+#      ActionOnFailure: CONTINUE
+#      HadoopJarStep:
+#        Args:
+#          - /mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-spark-ranger-plugin.sh
+#          - !Ref 'RangerHostname'
+#          - !Ref 'rangerVersion'
+#          - !Ref 's3artifactsRepo'
+#        Jar: s3://elasticmapreduce/libs/script-runner/script-runner.jar
+#        MainClass: ''
+#      JobFlowId: !Ref 'EMRSampleCluster'
+#      Name: InstallRangerSparkPlugin
+#    Condition: InstallSparkRangerPlugin
+#    Type: AWS::EMR::Step

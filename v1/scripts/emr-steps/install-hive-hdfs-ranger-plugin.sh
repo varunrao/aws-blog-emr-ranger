@@ -2,7 +2,11 @@
 set -euo pipefail
 set -x
 #Variables
-export JAVA_HOME=/usr/lib/jvm/java-openjdk
+if [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+  echo "found java executable in JAVA_HOME"
+else
+  export JAVA_HOME=/usr/lib/jvm/java-openjdk
+fi
 sudo -E bash -c 'echo $JAVA_HOME'
 installpath=/usr/lib/ranger
 ranger_fqdn=$1
@@ -106,6 +110,6 @@ sudo puppet apply -e 'service { "hadoop-hdfs-namenode": ensure => true, }'
 #Restart HiveServer2
 sudo puppet apply -e 'service { "hive-server2": ensure => false, }'
 sudo puppet apply -e 'service { "hive-server2": ensure => true, }'
-sudo sed -i '/hive.server2.logging.operation.verbose/s/kwargs/#kwargs/g' /usr/lib/hue/apps/beeswax/src/beeswax/server/hive_server2_lib.py
+sudo sed -i '/hive.server2.logging.operation.verbose/s/kwargs/#kwargs/g' /usr/lib/hue/apps/beeswax/src/beeswax/server/hive_server2_lib.py || true
 sudo puppet apply -e 'service { "hue": ensure => false, }'
 sudo puppet apply -e 'service { "hue": ensure => true, }'
