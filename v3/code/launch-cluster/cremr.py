@@ -108,7 +108,8 @@ def create(event, context):
                         "Args": [
                             "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-hive-hdfs-ranger-policies.sh",
                             event["ResourceProperties"]["RangerHostname"],
-                            "s3://" + s3Bucket + "/" + s3Key + "/inputdata"
+                            "s3://" + s3Bucket + "/" + s3Key + "/inputdata",
+                            "https"
                         ]
                     }
                 },
@@ -231,7 +232,7 @@ def create(event, context):
                                         "force_username_lowercase": "true",
                                         "ignore_username_case": "true",
                                         "ldap_url": "ldap://" + event["ResourceProperties"]["LDAPHostPrivateIP"],
-                                        "ldap_username_pattern": "uid' :<username>,,cn=users," +
+                                        "ldap_username_pattern": "uid' :<username>,cn=users," +
                                                                  event["ResourceProperties"][
                                                                      "LDAPSearchBase"],
                                         "nt_domain": event["ResourceProperties"]["DomainDNSName"],
@@ -306,6 +307,33 @@ def create(event, context):
         if event["ResourceProperties"]["EMRSecurityConfig"] != "false":
             cluster_parameters['SecurityConfiguration'] = event["ResourceProperties"]["EMRSecurityConfig"]
 
+        if event["ResourceProperties"]["InstallPrestoPlugin"] == "true":
+            cluster_parameters['Steps'].append({
+                "Name": "InstallRangerPrestoPlugin",
+                "ActionOnFailure": "CONTINUE",
+                "HadoopJarStep": {
+                    "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
+                    "Args": [
+                        "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-presto-ranger-plugin.sh",
+                        event["ResourceProperties"]["RangerHostname"],
+                        event["ResourceProperties"]["RangerVersion"],
+                        "s3://" + s3Bucket + "/" + event["ResourceProperties"]["S3Key"]
+                    ]
+                }
+            })
+            cluster_parameters['Steps'].append({
+                "Name": "InstallRangerPrestoPolicies",
+                "ActionOnFailure": "CONTINUE",
+                "HadoopJarStep": {
+                    "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
+                    "Args": [
+                        "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-presto-ranger-policies.sh",
+                        event["ResourceProperties"]["RangerHostname"],
+                        "s3://" + s3Bucket + "/" + event["ResourceProperties"]["S3Key"] + "/inputdata",
+                        "https"
+                    ]
+                }
+            })
         cluster_id = client.run_job_flow(**cluster_parameters)
 
         physical_resource_id = cluster_id["JobFlowId"]

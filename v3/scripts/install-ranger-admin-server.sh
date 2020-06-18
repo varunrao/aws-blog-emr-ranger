@@ -67,16 +67,17 @@ truststore_solr_alias="solrTrust"
 truststore_admin_alias="rangerAdminTrust"
 
 #Download certs
-mkdir ${certs_path}
+rm -rf ${certs_path}
+mkdir -p ${certs_path}
 aws s3 sync ${certs_s3_location} ${certs_path}
 
-mkdir ${ranger_agents_certs_path}
-mkdir ${ranger_server_certs_path}
-mkdir ${solr_certs_path}
+mkdir -p ${ranger_agents_certs_path}
+mkdir -p ${ranger_server_certs_path}
+mkdir -p ${solr_certs_path}
 
-unzip ${ranger_agents_certs_path}.zip -d ${ranger_agents_certs_path}
-unzip ${ranger_server_certs_path}.zip -d ${ranger_server_certs_path}
-unzip ${solr_certs_path}.zip -d ${solr_certs_path}
+unzip -o ${ranger_agents_certs_path}.zip -d ${ranger_agents_certs_path}
+unzip -o ${ranger_server_certs_path}.zip -d ${ranger_server_certs_path}
+unzip -o ${solr_certs_path}.zip -d ${solr_certs_path}
 
 sudo mkdir -p /etc/ranger/admin/conf
 
@@ -87,15 +88,15 @@ sudo keytool -importkeystore -deststorepass ${ranger_admin_keystore_password} -d
 #sudo chown ranger:ranger -R /etc/ranger
 
 #Setup Truststore - add RangerServer cert
-
+keytool -delete -alias ${truststore_plugins_alias} -keystore ${truststore_location} -storepass changeit -noprompt || true
 sudo keytool -import -file ${ranger_agents_certs_path}/trustedCertificates.pem -alias ${truststore_plugins_alias} -keystore ${truststore_location} -storepass changeit -noprompt
 
 #Setup Truststore - add Solr cert
-
+keytool -delete -alias ${truststore_solr_alias} -keystore ${truststore_location} -storepass changeit -noprompt || true
 sudo keytool -import -file ${solr_certs_path}/trustedCertificates.pem -alias ${truststore_solr_alias} -keystore ${truststore_location} -storepass changeit -noprompt
 
 #Setup Truststore - add RangerServer cert
-
+keytool -delete -alias ${truststore_admin_alias} -keystore ${truststore_location} -storepass changeit -noprompt || true
 sudo keytool -import -file ${ranger_server_certs_path}/trustedCertificates.pem -alias ${truststore_admin_alias} -keystore ${truststore_location} -storepass changeit -noprompt
 
 #Setup Keystore SOLR
@@ -148,7 +149,7 @@ _generateSQLGrantsAndCreateUser()
     HOSTNAMEI=`echo ${HOSTNAMEI}`
     cat >~/generate_grants.sql <<EOF
 CREATE USER IF NOT EXISTS '${RDS_RANGER_SCHEMA_DBUSER}'@'localhost' IDENTIFIED BY '${RDS_RANGER_SCHEMA_DBPASSWORD}';
-CREATE DATABASE ${RDS_RANGER_SCHEMA_DBNAME};
+CREATE DATABASE IF NOT EXISTS ${RDS_RANGER_SCHEMA_DBNAME};
 GRANT ALL PRIVILEGES ON \`%\`.* TO '${RDS_RANGER_SCHEMA_DBUSER}'@'localhost';
 CREATE USER IF NOT EXISTS '${RDS_RANGER_SCHEMA_DBUSER}'@'%' IDENTIFIED BY '${RDS_RANGER_SCHEMA_DBPASSWORD}';
 GRANT ALL PRIVILEGES ON \`%\`.* TO '${RDS_RANGER_SCHEMA_DBUSER}'@'%';
@@ -216,7 +217,8 @@ sudo sed -i "s|lookup_principal=.*|lookup_principal=Admin@awsemr.com|g" install.
 sudo sed -i "s|lookup_keytab=.*|lookup_keytab=/etc/awsadmin.keytab|g" install.properties
 
 #CHECKTHIS - FIX FOR java.lang.NoClassDefFoundError: org/apache/htrace/core/Tracer$Builder
-sudo cp /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/htrace-core4-4.1.0-incubating.jar /usr/lib/ranger/$ranger_admin_server/cred/lib
+sudo cp /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/htrace-core* /usr/lib/ranger/$ranger_admin_server/cred/lib
+sudo cp /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/commons-configuration* /usr/lib/ranger/$ranger_admin_server/cred/lib
 
 chmod +x setup.sh
 ./setup.sh
@@ -250,6 +252,9 @@ sudo sed -i "s|SYNC_LDAP_USER_SEARCH_BASE =.*|SYNC_LDAP_USER_SEARCH_BASE=$ldap_b
 sudo sed -i "s|SYNC_LDAP_USER_SEARCH_FILTER =.*|SYNC_LDAP_USER_SEARCH_FILTER=sAMAccountName=*|g" install.properties
 sudo sed -i "s|SYNC_LDAP_USER_NAME_ATTRIBUTE =.*|SYNC_LDAP_USER_NAME_ATTRIBUTE=sAMAccountName|g" install.properties
 sudo sed -i "s|SYNC_INTERVAL =.*|SYNC_INTERVAL=2|g" install.properties
+
+sudo cp /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/commons-configuration* /usr/lib/ranger/$ranger_user_sync/lib/
+
 chmod +x setup.sh
 ./setup.sh
 
@@ -294,7 +299,7 @@ sudo ln -s /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/range
 sudo ln -s /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/hdfs/ranger-hdfs-plugin-$ranger_download_version* /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/
 
 #CHECKTHIS - wrong path
-sudo cp /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/hive/* /usr/lib/ranger/ranger-admin/ews/webapp/WEB-INF/lib/
+sudo cp /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/hive/* /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/ || true
 
 #Setup proper owner for keytabs locations
 sudo chown solr:solr -R /etc/solr

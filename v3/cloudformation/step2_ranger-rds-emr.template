@@ -83,6 +83,10 @@ Parameters:
       - '2.0'
     Type: String
     Default: '2.0'
+  AppsEMR:
+    Description: 'Comma separated list of applications to install on the cluster e.g., '
+    Type: String
+    Default: Hadoop, Hive, Hue
   emrReleaseLabel:
     Description: EMR Version. Pick Ranger 0.6 if EMR version is 5.0 or higher
     AllowedValues:
@@ -118,6 +122,11 @@ Parameters:
     MinLength: '8'
     NoEcho: 'true'
     Type: String
+  InstallPrestoPlugin:
+    Description: Install Ranger PrestoDB plugin
+    Default: false
+    Type: String
+    AllowedValues: [true, false]
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -191,6 +200,7 @@ Resources:
     Properties:
       TemplateURL: !Join ['', ['https://s3.amazonaws.com/', !Ref 'S3Bucket', '/', !Ref 'S3Key', '/cloudformation/', 'emr-template.template']]
       Parameters:
+        AppsEMR: !Ref 'AppsEMR'
         myDirectoryBindUser: !Ref 'myDirectoryBindUser'
         myDirectoryBindPassword: !Ref 'myDirectoryBindPassword'
         DBHostName: !GetAtt 'RDSDatabase.Outputs.RDSInstanceAddress'
@@ -209,6 +219,7 @@ Resources:
         Subnet: !Ref 'PrivateSubnet1AID'
         S3Bucket: !Ref 'S3Bucket'
         S3Key: !Ref 'S3Key'
+        InstallPrestoPlugin: !Ref 'InstallPrestoPlugin'
       TimeoutInMinutes: '60'
 Outputs:
   RDSInstanceAddress:

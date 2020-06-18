@@ -260,6 +260,10 @@ Resources:
           ToPort: '6080'
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
+          FromPort: '6182'
+          ToPort: '6182'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
           FromPort: '8983'
           ToPort: '8983'
           CidrIp: 0.0.0.0/0

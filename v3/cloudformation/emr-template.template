@@ -118,6 +118,11 @@ Parameters:
   S3Key:
     Description: S3Key of the Lambda code
     Type: String
+  InstallPrestoPlugin:
+    Description: Install Ranger PrestoDB plugin
+    Default: false
+    Type: String
+    AllowedValues: [true, false]
 Conditions:
   emr-5.4: !Equals
     - !Ref 'emrReleaseLabel'
@@ -283,6 +288,7 @@ Resources:
       DBHostName: !Ref DBHostName
       DBUserName: !Ref DBUserName
       DBRootPassword: !Ref DBRootPassword
+      InstallPrestoPlugin: !Ref InstallPrestoPlugin
 
   emrCreateWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
