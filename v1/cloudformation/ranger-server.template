@@ -279,7 +279,7 @@ Resources:
             installrangerserver:
               command: !Join
                 - ''
-                - - 'bash /tmp/install-ranger-admin-server.sh '
+                - - 'bash /home/ec2-user/install-ranger-admin-server.sh '
                   - !Ref 'myDirectoryIPAddress'
                   - ' '
                   - !Ref 'myDirectoryBaseDN'
@@ -315,7 +315,7 @@ Resources:
         Fn::Join:
           - ''
           - - "#!/bin/bash\n"
-            - "cd /tmp\n"
+            - "cd /home/ec2-user/\n"
             - 'wget '
             - !Ref 's3artifactsRepoHttp'
             - "/scripts/install-ranger-admin-server.sh\n"

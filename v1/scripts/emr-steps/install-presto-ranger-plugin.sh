@@ -42,8 +42,6 @@ sudo chmod -R 777 $installpath
 cd $installpath
 #wget $mysql_jar_location
 aws s3 cp $ranger_s3bucket/$ranger_presto_plugin.tar.gz . --region us-east-1
-aws s3 cp $ranger_s3bucket/jdom-1.1.3.jar . --region us-east-1
-aws s3 cp $ranger_s3bucket/rome-0.9.jar . --region us-east-1
 
 #sudo cp presto-plugin-toolkit-0.194.jar /usr/lib/presto/plugin/hive-hadoop2/presto-plugin-toolkit-0.194.jar
 
@@ -85,11 +83,12 @@ sudo cp /usr/presto/etc/access-control.properties /usr/lib/presto/etc/
 sudo cp -r /usr/presto/plugin/ranger /usr/lib/presto/plugin/
 
 sudo cp /usr/lib/presto/lib/javax.ws*.jar /usr/lib/presto/plugin/ranger/
-sudo cp /usr/share/java/javamail.jar /usr/lib/presto/plugin/ranger/
+sudo cp /usr/share/java/javamail.jar /usr/lib/presto/plugin/ranger/ || true
 sudo aws s3 cp $ranger_s3bucket/jdom-1.1.3.jar /usr/lib/presto/plugin/ranger/ --region us-east-1
 sudo aws s3 cp $ranger_s3bucket/rome-0.9.jar /usr/lib/presto/plugin/ranger/ --region us-east-1
+sudo aws s3 cp $ranger_s3bucket/javax.mail-api-1.6.0.jar /usr/lib/presto/plugin/ranger/ --region us-east-1
 
-sudo ln -s /usr/lib/presto/plugin/ranger/ranger-presto-plugin-impl/conf /usr/lib/presto/plugin/ranger/
+sudo ln -s /usr/lib/presto/plugin/ranger/ranger-presto-plugin-impl/conf /usr/lib/presto/plugin/ranger/ || true
 sudo puppet apply -e 'service { "presto-server": ensure => false, }'
 sudo puppet apply -e 'service { "presto-server": ensure => true, }'
 

@@ -121,6 +121,7 @@ Resources:
         - Name: Hive
         - Name: Hadoop
         - Name: Hue
+        - Name: Presto
       BootstrapActions:
         - Name: Download scripts
           ScriptBootstrapAction:
