@@ -307,6 +307,7 @@ Resources:
           - !Ref 'RangerHostname'
           - !Ref 'rangerVersion'
           - !Ref 's3artifactsRepo'
+          - !Ref 'emrReleaseLabel'
         Jar: s3://elasticmapreduce/libs/script-runner/script-runner.jar
         MainClass: ''
       JobFlowId: !Ref 'EMRSampleCluster'
