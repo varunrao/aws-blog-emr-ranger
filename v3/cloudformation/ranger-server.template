@@ -294,13 +294,6 @@ Resources:
       - arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess
       Path: "/"
 
-  ManagedInstanceProfile:
-    Type: AWS::IAM::InstanceProfile
-    Properties:
-      Path: "/"
-      Roles:
-      - !Ref ManagedInstanceRole
-      InstanceProfileName: ManagedInstanceProfile
   myEC2:
     Type: AWS::EC2::Instance
     Metadata:

@@ -1,0 +1,379 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS CloudFormation template IAM Roles for Systems Manager | Automation Service
+
+Resources:
+  ManagedInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ssm.amazonaws.com
+            - ec2.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+      - arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess
+      - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+      - arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess
+      Path: "/"
+
+  ManagedInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+      - !Ref ManagedInstanceRole
+      InstanceProfileName: ManagedInstanceProfile
+
+  AutomationServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ssm.amazonaws.com
+            - ec2.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole
+      Path: "/"
+      RoleName: AutomationServiceRole
+      Policies:
+      - PolicyName: passrole
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - iam:PassRole
+            Resource:
+            - !GetAtt ManagedInstanceRole.Arn
+
+  EmrEc2Role:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: EmrEc2Role
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - ssm.amazonaws.com
+              - ec2.amazonaws.com
+            Action:
+            - sts:AssumeRole
+        ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforEC2Role
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+#        - !Join
+#              - ':'
+#              - - arn
+#                - aws
+#                - iam
+#                - ''
+#                - !Ref 'AWS::AccountId'
+#                - policy/SecureDatalakeKMSAccess
+
+  AthenaPrimaryGroupAccessPolicy:
+      Properties:
+        Description: Policy for AthenaPrimaryGroupAccessPolicy
+        Path: /
+        ManagedPolicyName: AthenaPrimaryGroupAccessPolicy
+        PolicyDocument:
+          Id: AthenaPrimaryGroupAccessPolicy
+          Statement:
+                  -
+                    Action:
+                      - "athena:GetNamespaces"
+                      - "athena:GetExecutionEngine"
+                      - "athena:GetNamespace"
+                      - "athena:GetQueryExecutions"
+                      - "athena:GetExecutionEngines"
+                      - "athena:GetTables"
+                      - "athena:GetTable"
+                      - "athena:ListWorkGroups"
+                      - "athena:RunQuery"
+                      - "athena:GetCatalogs"
+                    Effect: "Allow"
+                    Resource: '*'
+                  - Action:
+                      - "athena:*"
+                    Effect: "Allow"
+                    Resource: !Sub "arn:aws:athena:${AWS::Region}:${AWS::AccountId}:workgroup/primary"
+          Version: '2012-10-17'
+      Type: AWS::IAM::ManagedPolicy
+      DependsOn:
+        EmrEc2Role
+  DeveloperPolicy:
+      Properties:
+        Description: Policy for DeveloperPolicy
+        Path: /
+        ManagedPolicyName: DeveloperPolicy
+        PolicyDocument:
+          Id: DeveloperPolicy
+          Statement:
+                  -
+                    Action:
+                      - "s3:List*"
+                      - "s3:GetBucketLocation"
+                    Effect: "Allow"
+                    Resource: '*'
+          Version: '2012-10-17'
+      Type: AWS::IAM::ManagedPolicy
+      DependsOn:
+        EmrEc2Role
+  DeveloperRole:
+    Properties:
+      RoleName: DeveloperRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Join
+                - ':'
+                - - arn
+                  - aws
+                  - iam
+                  - ''
+                  - !Ref 'AWS::AccountId'
+                  - saml-provider/Okta
+            Action: sts:AssumeRoleWithSAML
+            Condition:
+              StringEquals:
+                SAML:aud: https://signin.aws.amazon.com/saml
+          - Effect: Allow
+            Principal:
+                AWS: !Join
+                  - ':'
+                  - - arn
+                    - aws
+                    - iam
+                    - ''
+                    - !Ref 'AWS::AccountId'
+                    - role/EmrEc2Role
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Ref 'DeveloperPolicy'
+    Type: AWS::IAM::Role
+  AnalystPolicy:
+    Properties:
+      Description: Policy for AnalystPolicy
+      ManagedPolicyName: AnalystPolicy
+      Path: /
+      PolicyDocument:
+        Id: AnalystPolicy
+        Statement:
+            -
+              Action:
+                - "s3:List*"
+                - "s3:GetBucketLocation"
+              Effect: "Allow"
+              Resource: '*'
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  AnalystRole:
+    Properties:
+      RoleName: AnalystRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Join
+                - ':'
+                - - arn
+                  - aws
+                  - iam
+                  - ''
+                  - !Ref 'AWS::AccountId'
+                  - saml-provider/Okta
+            Action: sts:AssumeRoleWithSAML
+            Condition:
+              StringEquals:
+                SAML:aud: https://signin.aws.amazon.com/saml
+          - Effect: Allow
+            Principal:
+                AWS: !Join
+                  - ':'
+                  - - arn
+                    - aws
+                    - iam
+                    - ''
+                    - !Ref 'AWS::AccountId'
+                    - role/EmrEc2Role
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Ref 'AnalystPolicy'
+    DependsOn:
+            EmrEc2Role
+    Type: AWS::IAM::Role
+  SecurityadminPolicy:
+    Properties:
+      Description: Policy for Securityadmin
+      ManagedPolicyName: SecurityadminPolicy
+      Path: /
+      PolicyDocument:
+        Id: SecurityadminPolicy
+        Statement:
+            -
+              Action:
+                - "s3:List*"
+                - "s3:GetBucketLocation"
+              Effect: "Allow"
+              Resource: '*'
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  SecurityadminRole:
+    Properties:
+      RoleName: SecurityadminRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Join
+                - ':'
+                - - arn
+                  - aws
+                  - iam
+                  - ''
+                  - !Ref 'AWS::AccountId'
+                  - saml-provider/Okta
+            Action: sts:AssumeRoleWithSAML
+            Condition:
+              StringEquals:
+                SAML:aud: https://signin.aws.amazon.com/saml
+          - Effect: Allow
+            Principal:
+                AWS: !Join
+                  - ':'
+                  - - arn
+                    - aws
+                    - iam
+                    - ''
+                    - !Ref 'AWS::AccountId'
+                    - role/EmrEc2Role
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Ref 'SecurityadminPolicy'
+    Type: AWS::IAM::Role
+    DependsOn:
+      EmrEc2Role
+  BusinessuserProduct1Policy:
+    Properties:
+      Description: Policy for Businessuser_Product1
+      ManagedPolicyName: BusinessuserProduct1Policy
+      Path: /
+      PolicyDocument:
+        Statement:
+              -
+                Action:
+                  - "s3:List*"
+                  - "s3:GetBucketLocation"
+                Effect: "Allow"
+                Resource: '*'
+        Id: Businessuser_Product1Policy
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  BusinessuserProduct1Role:
+    Properties:
+      RoleName: Businessuser_Product1Role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Join
+                - ':'
+                - - arn
+                  - aws
+                  - iam
+                  - ''
+                  - !Ref 'AWS::AccountId'
+                  - saml-provider/Okta
+            Action: sts:AssumeRoleWithSAML
+            Condition:
+              StringEquals:
+                SAML:aud: https://signin.aws.amazon.com/saml
+          - Effect: Allow
+            Principal:
+              AWS: !Join
+                - ':'
+                - - arn
+                  - aws
+                  - iam
+                  - ''
+                  - !Ref 'AWS::AccountId'
+                  - role/EmrEc2Role
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Ref 'BusinessuserProduct1Policy'
+    Type: AWS::IAM::Role
+    DependsOn:
+      EmrEc2Role
+  CustomerCompanyAPolicy:
+    Properties:
+      Description: Policy for Customer_CompanyA
+      ManagedPolicyName: CustomerCompanyAPolicy
+      Path: /
+      PolicyDocument:
+        Id: Customer_CompanyAPolicy
+        Statement:
+            -
+              Action:
+                - "s3:List*"
+                - "s3:GetBucketLocation"
+              Effect: "Allow"
+              Resource: '*'
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  CustomerCompanyARole:
+    Properties:
+      RoleName: Customer_CompanyARole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Join
+                - ':'
+                - - arn
+                  - aws
+                  - iam
+                  - ''
+                  - !Ref 'AWS::AccountId'
+                  - saml-provider/Okta
+            Action: sts:AssumeRoleWithSAML
+            Condition:
+              StringEquals:
+                SAML:aud: https://signin.aws.amazon.com/saml
+          - Effect: Allow
+            Principal:
+              AWS: !Join
+                - ':'
+                - - arn
+                  - aws
+                  - iam
+                  - ''
+                  - !Ref 'AWS::AccountId'
+                  - role/EmrEc2Role
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Ref 'CustomerCompanyAPolicy'
+    Type: AWS::IAM::Role
+    DependsOn:
+      EmrEc2Role
+
+Outputs:
+  ManagedInstanceProfile:
+    Description: Instance Role to use for SSM
+    Value: !Ref ManagedInstanceProfile

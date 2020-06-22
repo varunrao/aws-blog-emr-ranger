@@ -228,7 +228,7 @@ Outputs:
   RangerServerIP:
     Value: !GetAtt 'RangerServer.Outputs.IPAddress'
   HueIPAddress:
-    Value: !GetAtt 'EMRCluster.Outputs.IPAddress'
-  EMRMasterNodeIPAddress:
-    Description: IP address of EMR cluster MasterNode
-    Value: !GetAtt 'EMRCluster.Outputs.IPAddress'
+    Value: !GetAtt 'EMRCluster.Outputs.EMRClusterURL'
+  EMRClusterURL:
+    Description: Cluster EMR cluster MasterNode
+    Value: !GetAtt 'EMRCluster.Outputs.EMRClusterURL'
