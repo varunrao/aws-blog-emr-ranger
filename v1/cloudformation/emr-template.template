@@ -104,6 +104,9 @@ Conditions:
   emr-5.29: !Equals
     - !Ref 'emrReleaseLabel'
     - emr-5.29.0
+  emr-5.30: !Equals
+    - !Ref 'emrReleaseLabel'
+    - emr-5.30.0
   emr-6.0: !Equals
     - !Ref 'emrReleaseLabel'
     - emr-6.0.0
@@ -330,6 +333,18 @@ Resources:
       JobFlowId: !Ref 'EMRSampleCluster'
       Name: InstallRangerPrestoPolicies
     Condition: InstallPrestoRangerPlugin
+    Type: AWS::EMR::Step
+  UpdateHueConfiguration:
+    Properties:
+      ActionOnFailure: CONTINUE
+      HadoopJarStep:
+        Args:
+          - /mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/hue-update.sh
+        Jar: s3://elasticmapreduce/libs/script-runner/script-runner.jar
+        MainClass: ''
+      JobFlowId: !Ref 'EMRSampleCluster'
+      Name: UpdateHueConfiguration
+    Condition: emr-5.30
     Type: AWS::EMR::Step
 #  InstallRangerSparkPlugin:
 #    Properties:
