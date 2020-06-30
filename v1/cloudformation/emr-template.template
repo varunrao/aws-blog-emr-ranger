@@ -125,6 +125,8 @@ Resources:
         - Name: Hadoop
         - Name: Hue
         - Name: Presto
+        - Name: Spark
+        - Name: Livy
       BootstrapActions:
         - Name: Download scripts
           ScriptBootstrapAction:
@@ -191,7 +193,7 @@ Resources:
             hadoop.security.group.mapping.ldap.search.attr.group.name: cn
         - Classification: hdfs-site
           ConfigurationProperties:
-            fs.permissions.umask-mode: '077'
+            fs.permissions.umask-mode: '066'
       Instances:
         CoreInstanceGroup:
           EbsConfiguration:
