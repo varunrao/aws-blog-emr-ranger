@@ -58,7 +58,7 @@ Parameters:
     Type: String
     AllowedPattern: ^s3://.*
   MasterInstanceCount:
-    Default: '1'
+    Default: '3'
     Description: Number of master instances
     Type: Number
   MasterInstanceType:
