@@ -57,6 +57,10 @@ Parameters:
     Description: 'Log Dir for the EMR cluster. Eg: s3://xxx'
     Type: String
     AllowedPattern: ^s3://.*
+  MasterInstanceCount:
+    Default: '1'
+    Description: Number of master instances
+    Type: Number
   MasterInstanceType:
     Default: m4.2xlarge
     Description: Instance Type of the master node
@@ -212,6 +216,7 @@ Resources:
         CoreInstanceType: !Ref 'CoreInstanceType'
         EMRClusterName: !Ref 'EMRClusterName'
         EMRLogDir: !Ref 'EMRLogDir'
+        MasterInstanceCount: !Ref 'MasterInstanceCount'
         MasterInstanceType: !Ref 'MasterInstanceType'
         RangerHostname: !GetAtt 'RangerServer.Outputs.IPAddress'
         VPC: !Ref 'VPCID'
