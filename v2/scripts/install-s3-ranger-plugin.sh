@@ -45,6 +45,7 @@ sudo tar -xvf $ranger_s3_plugin.tar.gz -C $ranger_s3_plugin --strip-components=1
 cd $installpath/s3/$ranger_s3_plugin
 
 
+#sudo cp lib/* /usr/share/aws/emr/emrfs/lib/
 sudo cp lib/* /usr/share/aws/emr/emrfs/lib/
 sudo sed -i "s|ranger_host|$ranger_fqdn|g" install/conf/ranger-awss3-audit.xml
 sudo sed -i "s|ranger_host|$ranger_fqdn|g" install/conf/ranger-awss3-security.xml
@@ -56,6 +57,8 @@ sudo mkdir -p /etc/ranger/awss3/
 sudo chmod -R 777 /etc/ranger/awss3/ || true
 sudo mkdir -p /var/log/emr-awss3/
 sudo touch /var/log/emr-awss3/awss3.log || true
-sudo chmod 777 /var/log/emr-awss3/awss3.log || true
+sudo chmod -R 777 /var/log/emr-awss3/ || true
 sudo mkdir -p /etc/ranger/awss3/policycache/ || true
 sudo chmod -R 777 /etc/ranger/awss3/ || true
+#sudo groupadd hadoop || true
+#sudo iptables -A OUTPUT -m owner ! --gid-owner hadoop -d 169.254.169.254 -j DROP || true
