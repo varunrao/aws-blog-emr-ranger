@@ -49,22 +49,28 @@ certs_path="/tmp/certs"
 
 current_hostname=$(hostname -f)
 
-ranger_agents_certs_path="${certs_path}/ranger-server-certs"
-ranger_server_certs_path="${certs_path}/ranger-agents-certs"
+
+ranger_beta_service_def_location=aws-emr-bda-public.s3.amazonaws.com/ranger-private-beta/v1/service-defination
+ranger_beta_service_def_version=1.2.0
+HTTP_URL=https://localhost:6182
+ranger_agents_certs_path="${certs_path}/ranger-agents-certs"
+ranger_server_certs_path="${certs_path}/ranger-server-certs"
 solr_certs_path="${certs_path}/solr-client-certs"
 
-ranger_admin_keystore_alias="ranger-admin"
-ranger_admin_keystore_password="ranger-admin-password"
-ranger_admin_keystore_location="/etc/ranger/admin/conf/ranger-admin.jks"
+ranger_admin_keystore_alias="rangeradmin"
+ranger_admin_keystore_password="changeit"
+ranger_admin_keystore_location="/etc/ranger/admin/conf/ranger-admin-keystore.jks"
+ranger_admin_truststore_location="$JAVA_HOME/lib/security/cacerts"
+ranger_admin_truststore_password="changeit"
+
 
 solr_keystore_location="/etc/solr/conf/solr.jks"
 solr_keystore_alias="solr"
-solr_keystore_password="solr-password"
+solr_keystore_password="changeit"
 
-truststore_location="$JAVA_HOME/lib/security/cacerts"
-truststore_plugins_alias="rangerAgentsTrust"
+truststore_plugins_alias="rangerplugin"
 truststore_solr_alias="solrTrust"
-truststore_admin_alias="rangerAdminTrust"
+truststore_admin_alias="rangeradmin"
 
 #Download certs
 rm -rf ${certs_path}
@@ -81,29 +87,30 @@ unzip -o ${solr_certs_path}.zip -d ${solr_certs_path}
 
 sudo mkdir -p /etc/ranger/admin/conf
 
-#Setup Keystore RangerAdmin
-
+#Setup Keystore for RangerAdmin
 openssl pkcs12 -export -in ${ranger_server_certs_path}/certificateChain.pem -inkey ${ranger_server_certs_path}/privateKey.pem -chain -CAfile ${ranger_server_certs_path}/trustedCertificates.pem -name ${ranger_admin_keystore_alias} -out ${ranger_server_certs_path}/keystore.p12 -password pass:${ranger_admin_keystore_password}
+keytool -delete -alias ${ranger_admin_keystore_alias} -keystore ${ranger_admin_keystore_location} -storepass ${ranger_admin_keystore_password} -noprompt || true
 sudo keytool -importkeystore -deststorepass ${ranger_admin_keystore_password} -destkeystore ${ranger_admin_keystore_location} -srckeystore ${ranger_server_certs_path}/keystore.p12 -srcstoretype PKCS12 -srcstorepass ${ranger_admin_keystore_password}
 #sudo chown ranger:ranger -R /etc/ranger
 
-#Setup Truststore - add RangerServer cert
-keytool -delete -alias ${truststore_plugins_alias} -keystore ${truststore_location} -storepass changeit -noprompt || true
-sudo keytool -import -file ${ranger_agents_certs_path}/trustedCertificates.pem -alias ${truststore_plugins_alias} -keystore ${truststore_location} -storepass changeit -noprompt
+#Setup Truststore - add agent cert to Ranger Admin
+keytool -delete -alias ${truststore_plugins_alias} -keystore ${ranger_admin_truststore_location} -storepass changeit -noprompt || true
+sudo keytool -import -file ${ranger_agents_certs_path}/trustedCertificates.pem -alias ${truststore_plugins_alias} -keystore ${ranger_admin_truststore_location} -storepass changeit -noprompt
 
-#Setup Truststore - add Solr cert
-keytool -delete -alias ${truststore_solr_alias} -keystore ${truststore_location} -storepass changeit -noprompt || true
-sudo keytool -import -file ${solr_certs_path}/trustedCertificates.pem -alias ${truststore_solr_alias} -keystore ${truststore_location} -storepass changeit -noprompt
+#Setup Truststore - add Solr cert to Ranger Admin
+keytool -delete -alias ${truststore_solr_alias} -keystore ${ranger_admin_truststore_location} -storepass changeit -noprompt || true
+sudo keytool -import -file ${solr_certs_path}/trustedCertificates.pem -alias ${truststore_solr_alias} -keystore ${ranger_admin_truststore_location} -storepass changeit -noprompt
 
 #Setup Truststore - add RangerServer cert
-keytool -delete -alias ${truststore_admin_alias} -keystore ${truststore_location} -storepass changeit -noprompt || true
-sudo keytool -import -file ${ranger_server_certs_path}/trustedCertificates.pem -alias ${truststore_admin_alias} -keystore ${truststore_location} -storepass changeit -noprompt
+keytool -delete -alias ${truststore_admin_alias} -keystore ${ranger_admin_truststore_location} -storepass changeit -noprompt || true
+sudo keytool -import -file ${ranger_server_certs_path}/trustedCertificates.pem -alias ${truststore_admin_alias} -keystore ${ranger_admin_truststore_location} -storepass changeit -noprompt
 
 #Setup Keystore SOLR
 
 sudo mkdir -p /etc/solr/conf
 
 openssl pkcs12 -export -in ${solr_certs_path}/certificateChain.pem -inkey ${solr_certs_path}/privateKey.pem -chain -CAfile ${solr_certs_path}/trustedCertificates.pem -name ${solr_keystore_alias} -out ${solr_certs_path}/keystore.p12 -password pass:${solr_keystore_password}
+keytool -delete -alias ${solr_keystore_alias} -keystore ${solr_keystore_location} -storepass ${solr_keystore_password} -noprompt  || true
 sudo keytool -importkeystore -deststorepass ${solr_keystore_password} -destkeystore ${solr_keystore_location} -srckeystore ${solr_certs_path}/keystore.p12 -srcstoretype PKCS12 -srcstorepass ${solr_keystore_password}
 
 # Setup
@@ -220,6 +227,10 @@ sudo sed -i "s|lookup_keytab=.*|lookup_keytab=/etc/awsadmin.keytab|g" install.pr
 sudo cp /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/htrace-core* /usr/lib/ranger/$ranger_admin_server/cred/lib
 sudo cp /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/commons-configuration* /usr/lib/ranger/$ranger_admin_server/cred/lib
 
+## Install the spark ranger plugin
+sudo mkdir -p /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/amazon-emr-spark
+cp -r /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/hive/* /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/classes/ranger-plugins/amazon-emr-spark/
+
 chmod +x setup.sh
 ./setup.sh
 
@@ -252,6 +263,9 @@ sudo sed -i "s|SYNC_LDAP_USER_SEARCH_BASE =.*|SYNC_LDAP_USER_SEARCH_BASE=$ldap_b
 sudo sed -i "s|SYNC_LDAP_USER_SEARCH_FILTER =.*|SYNC_LDAP_USER_SEARCH_FILTER=sAMAccountName=*|g" install.properties
 sudo sed -i "s|SYNC_LDAP_USER_NAME_ATTRIBUTE =.*|SYNC_LDAP_USER_NAME_ATTRIBUTE=sAMAccountName|g" install.properties
 sudo sed -i "s|SYNC_INTERVAL =.*|SYNC_INTERVAL=2|g" install.properties
+# SSL conf
+sudo sed -i "s|AUTH_SSL_TRUSTSTORE_FILE=.*|AUTH_SSL_TRUSTSTORE_FILE=$ranger_admin_truststore_location|g" install.properties
+sudo sed -i "s|AUTH_SSL_TRUSTSTORE_PASSWORD=.*|AUTH_SSL_TRUSTSTORE_PASSWORD=$ranger_admin_truststore_password|g" install.properties
 
 sudo cp /usr/lib/ranger/$ranger_admin_server/ews/webapp/WEB-INF/lib/commons-configuration* /usr/lib/ranger/$ranger_user_sync/lib/
 
@@ -322,6 +336,15 @@ done
 sudo /usr/bin/ranger-usersync stop || true
 sudo /usr/bin/ranger-usersync start
 #cd $installpath
+
+## Update the Ranger service def
+#wget https://${ranger_beta_service_def_location}/${ranger_beta_service_def_version}/ranger-servicedef-amazon-emr-spark.json
+## curl -iv --insecure -u admin:<pwd> -d @ranger-amzn-spark-repo.json -H 'Content-Type: application/json' -X DELETE -k https://localhost:6182/service/public/v2/api/servicedef/204
+aws s3 cp $s3bucket_http_url/inputdata/ranger-servicedef-amazon-emr-spark.json .
+curl -iv --insecure -u admin:admin -X POST -d @ranger-servicedef-amazon-emr-spark.json -H "Accept: application/json" -H "Content-Type: application/json" -k $HTTP_URL/service/public/v2/api/servicedef
+aws s3 cp $s3bucket_http_url/inputdata/ranger-repo-amazon-emr-spark.json .
+curl -iv --insecure -u admin:admin -d @ranger-repo-amazon-emr-spark.json -H "Content-Type: application/json" -X POST $HTTP_URL/service/public/v2/api/service/
+
 # Restart SOLR
 sudo /opt/solr/ranger_audit_server/scripts/stop_solr.sh || true
 sudo /opt/solr/ranger_audit_server/scripts/start_solr.sh

@@ -79,7 +79,9 @@ def create(event, context):
                             s3Key,
                             event["ResourceProperties"]["RangerHostname"],
                             event["ResourceProperties"]["RangerVersion"],
-                            "s3://" + s3Bucket + "/" + s3Key
+                            "s3://" + s3Bucket + "/" + s3Key,
+                            event["ResourceProperties"]["InstallCloudWatchAgentForAudit"],
+                            "https"
                         ]
 
                     }
@@ -87,32 +89,33 @@ def create(event, context):
             ],
             'Applications': applist,
             'Steps': [
-                {
-                    "Name": "InstallHiveHDFSRangerPlugin",
-                    "ActionOnFailure": "CONTINUE",
-                    "HadoopJarStep": {
-                        "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
-                        "Args": [
-                            "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-hive-hdfs-ranger-plugin.sh",
-                            event["ResourceProperties"]["RangerHostname"],
-                            event["ResourceProperties"]["RangerVersion"],
-                            "s3://" + s3Bucket + "/" + s3Key
-                        ]
-                    }
-                },
-                {
-                    "Name": "InstallHiveHDFSRangerPolicies",
-                    "ActionOnFailure": "CONTINUE",
-                    "HadoopJarStep": {
-                        "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
-                        "Args": [
-                            "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-hive-hdfs-ranger-policies.sh",
-                            event["ResourceProperties"]["RangerHostname"],
-                            "s3://" + s3Bucket + "/" + s3Key + "/inputdata",
-                            "https"
-                        ]
-                    }
-                },
+                # {
+                #     "Name": "InstallHiveHDFSRangerPlugin",
+                #     "ActionOnFailure": "CONTINUE",
+                #     "HadoopJarStep": {
+                #         "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
+                #         "Args": [
+                #             "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-hive-hdfs-ranger-plugin.sh",
+                #             event["ResourceProperties"]["RangerHostname"],
+                #             event["ResourceProperties"]["RangerVersion"],
+                #             "s3://" + s3Bucket + "/" + s3Key,
+                #             event["ResourceProperties"]["InstallCloudWatchAgentForAudit"]
+                #         ]
+                #     }
+                # },
+                # {
+                #     "Name": "InstallHiveHDFSRangerPolicies",
+                #     "ActionOnFailure": "CONTINUE",
+                #     "HadoopJarStep": {
+                #         "Jar": "s3://elasticmapreduce/libs/script-runner/script-runner.jar",
+                #         "Args": [
+                #             "/mnt/tmp/aws-blog-emr-ranger/scripts/emr-steps/install-hive-hdfs-ranger-policies.sh",
+                #             event["ResourceProperties"]["RangerHostname"],
+                #             "s3://" + s3Bucket + "/" + s3Key + "/inputdata",
+                #             "https"
+                #         ]
+                #     }
+                # },
                 {
                     "Name": "LoadHDFSData",
                     "ActionOnFailure": "CONTINUE",

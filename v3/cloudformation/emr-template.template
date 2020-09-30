@@ -123,6 +123,11 @@ Parameters:
     Default: false
     Type: String
     AllowedValues: [true, false]
+  InstallCloudWatchAgentForAudit:
+    Description: Install Cloudwatch Agent to capture Ranger AuditLogs
+    Default: false
+    Type: String
+    AllowedValues: [true, false]
 Conditions:
   emr-5.4: !Equals
     - !Ref 'emrReleaseLabel'
@@ -289,7 +294,7 @@ Resources:
       DBUserName: !Ref DBUserName
       DBRootPassword: !Ref DBRootPassword
       InstallPrestoPlugin: !Ref InstallPrestoPlugin
-
+      InstallCloudWatchAgentForAudit: !Ref InstallCloudWatchAgentForAudit
   emrCreateWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
     Properties: {}

@@ -12,6 +12,7 @@ ranger_fqdn=$(nslookup ${ranger_ip} | grep "name" | awk '{print $4}' | sed 's/.$
 mysql_jar=mysql-connector-java-5.1.39.jar
 ranger_version=$2
 s3bucket=$3
+install_cloudwatch_agent_for_audit=$4
 ranger_download_version=0.5
 if [ "$ranger_version" == "2.0" ]; then
    ranger_download_version=2.1.0-SNAPSHOT
@@ -33,20 +34,23 @@ ranger_hive_plugin=ranger-$ranger_download_version-hive-plugin
 certs_s3_location=${s3bucket}/emr-tls/
 certs_path="/tmp/certs"
 
-ranger_agents_certs_path="${certs_path}/ranger-server-certs"
-ranger_server_certs_path="${certs_path}/ranger-agents-certs"
+ranger_agents_certs_path="${certs_path}/ranger-agents-certs"
+ranger_server_certs_path="${certs_path}/ranger-server-certs"
 solr_certs_path="${certs_path}/solr-client-certs"
 
 truststore_ranger_server_alias="rangerServerTrust"
 truststore_solr_alias="solrtrust"
-truststore_password="ranger-agent-truststore-password"
+truststore_password="changeit"
 truststore_location="/etc/hadoop/conf/ranger-plugin-truststore.jks"
 
 keystore_alias="rangerAgent"
-keystore_password="ranger-agent-keystore-password"
+keystore_password="changeit"
 keystore_location="/etc/hadoop/conf/ranger-plugin-keystore.jks"
 
 #Download certs
+rm -rf ${certs_path}
+rm -rf ${truststore_location}
+rm -rf ${keystore_location}
 
 mkdir ${certs_path}
 aws s3 sync ${certs_s3_location} ${certs_path}
@@ -62,15 +66,16 @@ unzip ${solr_certs_path}.zip -d ${solr_certs_path}
 #Setup RangerAgents Keystore
 
 openssl pkcs12 -export -in ${ranger_agents_certs_path}/certificateChain.pem -inkey ${ranger_agents_certs_path}/privateKey.pem -chain -CAfile ${ranger_agents_certs_path}/trustedCertificates.pem -name ${keystore_alias} -out ${ranger_agents_certs_path}/keystore.p12 -password pass:${keystore_password}
+keytool -delete -alias ${keystore_alias} -keystore ${keystore_location} -storepass ${keystore_password} -noprompt || true
 keytool -importkeystore -deststorepass ${keystore_password} -destkeystore ${keystore_location} -srckeystore ${ranger_agents_certs_path}/keystore.p12 -srcstoretype PKCS12 -srcstorepass ${keystore_password}
 chmod 444 ${keystore_location}
 
 #Setup Truststore - add RangerServer cert
-
+keytool -delete -alias ${truststore_ranger_server_alias} -keystore ${truststore_location} -storepass ${truststore_password} -noprompt || true
 keytool -import -file ${ranger_server_certs_path}/trustedCertificates.pem -alias ${truststore_ranger_server_alias} -keystore ${truststore_location} -storepass ${truststore_password} -noprompt
 
 #Setup Truststore - add SOLR cert
-
+keytool -delete -alias ${truststore_solr_alias} -keystore ${truststore_location} -storepass ${truststore_password} -noprompt || true
 keytool -import -file ${solr_certs_path}/trustedCertificates.pem -alias ${truststore_solr_alias} -keystore ${truststore_location} -storepass ${truststore_password} -noprompt
 
 #cleanup
@@ -78,6 +83,7 @@ rm -rf ${certs_path}
 
 #Setup
 sudo rm -rf $installpath
+sudo rm -rf /etc/ranger/ || true
 sudo mkdir -p $installpath/hadoop
 sudo chmod -R 777 $installpath
 cd $installpath
@@ -134,7 +140,17 @@ sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL.ROLLOVER.SECS=.*|XAAUDIT.FILECACHE.F
 sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL.MAXFILES=.*|XAAUDIT.FILECACHE.FILE_SPOOL.MAXFILES=10|g" install.properties
 
 #to solve java.lang.NoClassDefFoundError: org/apache/commons/configuration/Configuration
-sed -i 's/jceks:\/\/file/localjceks:\/\/file/' enable-hdfs-plugin.sh
+sed -i 's|jceks://file|localjceks://file|g' enable-hdfs-plugin.sh
+
+#Filecache to write to local file system
+if [ "$install_cloudwatch_agent_for_audit" == "true" ]; then
+  sudo mkdir -p /var/log/ranger/audit/
+  sudo chmod -R 777 /var/log/ranger/audit/
+  sudo sed -i "s|XAAUDIT.FILECACHE.IS_ENABLED=.*|XAAUDIT.FILECACHE.IS_ENABLED=true|g" install.properties
+  sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL_DIR=.*|XAAUDIT.FILECACHE.FILE_SPOOL_DIR=/var/log/ranger/audit/|g" install.properties
+  sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL.ROLLOVER.SECS=.*|XAAUDIT.FILECACHE.FILE_SPOOL.ROLLOVER.SECS=30|g" install.properties
+  sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL.MAXFILES=.*|XAAUDIT.FILECACHE.FILE_SPOOL.MAXFILES=10|g" install.properties
+fi
 
 sudo -E bash enable-hdfs-plugin.sh
 # new copy cammand - 01/26/2020
@@ -176,7 +192,17 @@ sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL.MAXFILES=.*|XAAUDIT.FILECACHE.FILE_S
 
 
 #to solve java.lang.NoClassDefFoundError: org/apache/commons/configuration/Configuration
-sed -i 's/jceks:\/\/file/localjceks:\/\/file/' enable-hive-plugin.sh
+sed -i 's|jceks://file|localjceks://file|g' enable-hive-plugin.sh
+
+#Filecache to write to local file system
+if [ "$install_cloudwatch_agent_for_audit" == "true" ]; then
+  sudo mkdir -p /var/log/ranger/audit/
+  sudo chmod -R 777 /var/log/ranger/audit/
+  sudo sed -i "s|XAAUDIT.FILECACHE.IS_ENABLED=.*|XAAUDIT.FILECACHE.IS_ENABLED=true|g" install.properties
+  sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL_DIR=.*|XAAUDIT.FILECACHE.FILE_SPOOL_DIR=/var/log/ranger/audit/|g" install.properties
+  sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL.ROLLOVER.SECS=.*|XAAUDIT.FILECACHE.FILE_SPOOL.ROLLOVER.SECS=30|g" install.properties
+  sudo sed -i "s|XAAUDIT.FILECACHE.FILE_SPOOL.MAXFILES=.*|XAAUDIT.FILECACHE.FILE_SPOOL.MAXFILES=10|g" install.properties
+fi
 
 sudo -E bash enable-hive-plugin.sh
 #sudo cp /usr/lib/hive/ranger-*.jar /usr/lib/hive/lib/
