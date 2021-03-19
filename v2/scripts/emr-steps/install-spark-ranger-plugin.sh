@@ -2,7 +2,11 @@
 set -euo pipefail
 set -x
 #Variables
-export JAVA_HOME=/usr/lib/jvm/java-openjdk
+if [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+  echo "found java executable in JAVA_HOME"
+else
+  export JAVA_HOME=/usr/lib/jvm/java-openjdk
+fi
 sudo -E bash -c 'echo $JAVA_HOME'
 #installpath=/usr/lib/ranger
 installpath=/usr/local
@@ -11,6 +15,7 @@ mysql_jar=mysql-connector-java-5.1.39.jar
 s3bucket=$3
 ranger_version=$2
 ranger_fqdn=$1
+is_s3_plugin_installed=$4
 
 #s3bucket={{ssm:s3scriptpath}}
 #ranger_version={{ssm:rangerversion}}
@@ -50,7 +55,11 @@ cd $installpath/$ranger_spark_plugin
 sudo sed -i "s|ranger_host|$ranger_fqdn|g" install/conf/ranger-*.xml
 #sudo sed -i "s|ranger_host|$ranger_fqdn|g" install/conf/ranger-hive-security.xml
 
-sudo cp lib/* $SPARK_HOME/jars/
+if [ "$is_s3_plugin_installed" == "true" ]; then
+   sudo cp lib/ranger-spark* $SPARK_HOME/jars/
+else
+   sudo cp lib/* $SPARK_HOME/jars/
+fi
 #sudo cp install/lib/* $SPARK_HOME/jars/
 sudo cp install/conf/* $SPARK_HOME/conf/ || true
 
